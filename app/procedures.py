@@ -12,16 +12,19 @@ def create_procedures():
                 INSERT INTO users (name, phone, role) VALUES (name, phone, role);
             END;
             $$;
+        """))
 
-
+        db.execute(text("""
             CREATE OR REPLACE PROCEDURE add_service(name TEXT, price TEXT)
             LANGUAGE plpgsql AS $$
             BEGIN
                 INSERT INTO services (service_name, price_per_hour) VALUES (name, price);
             END;
             $$;
+        """))
 
-            CREATE OR REPLACE PROCEDURE add_schedule(trainer_id INTEGER, service_id INTEGER, date_calendar DATE
+        db.execute(text("""
+            CREATE OR REPLACE PROCEDURE add_schedule(trainer_id INTEGER, service_id INTEGER, date_calendar DATE, 
                                                      start_time TIME, end_time TIME)
             LANGUAGE plpgsql AS $$
             BEGIN
@@ -29,7 +32,9 @@ def create_procedures():
                               VALUES (trainer_id, service_id, date_calendar, start_time, end_time);
             END;
             $$;
+        """))
 
+        db.execute(text("""
             CREATE OR REPLACE PROCEDURE add_booking(client_id INTEGER, schedule_id INTEGER)
             LANGUAGE plpgsql AS $$
             BEGIN

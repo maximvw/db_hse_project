@@ -3,7 +3,7 @@ from datetime import date, time
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-# from app.models import User, Service, Schedule, Booking
+from app.models import User, Service, Schedule, Booking
 
 
 def add_user(db: Session, name: str, phone: str, role: str):
