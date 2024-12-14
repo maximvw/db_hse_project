@@ -7,7 +7,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
     phone = Column(String(15), nullable=False)
     role = Column(String, nullable=False)  # клиент/тренер
@@ -16,7 +16,7 @@ class User(Base):
 class Service(Base):
     __tablename__ = "services"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     service_name = Column(String, nullable=False, unique=True)
     price_per_hour = Column(Integer, nullable=False)
 
@@ -24,7 +24,7 @@ class Service(Base):
 class Schedule(Base):
     __tablename__ = "schedule"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     trainer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     service_id = Column(Integer, ForeignKey("services.id"), nullable=False)
     date = Column(Date, nullable=False)
@@ -38,7 +38,7 @@ class Schedule(Base):
 class Booking(Base):
     __tablename__ = "bookings"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     client_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     schedule_id = Column(Integer, ForeignKey("schedule.id"), nullable=False)
     total_cost = Column(Float, nullable=True)

@@ -10,8 +10,8 @@ if __name__ == "__main__":
 
     # Инициализация базы данных
     Base.metadata.create_all(bind=engine)
-    create_triggers(engine)
-    create_procedures(engine)
+    create_triggers()
+    create_procedures()
 
     # Запуск приложения
     app = QApplication(sys.argv)

@@ -1,9 +1,11 @@
 from sqlalchemy import text
 
+from app.database import get_db
 
-def create_triggers(engine):
-    with engine.connect() as connection:
-        connection.execute(text("""
+
+def create_triggers():
+    with next(get_db()) as db:
+        db.execute(text("""
             CREATE OR REPLACE FUNCTION calculate_total_cost()
             RETURNS TRIGGER AS $$
             BEGIN
@@ -19,9 +21,10 @@ def create_triggers(engine):
             $$ LANGUAGE plpgsql;
         """))
 
-        connection.execute(text("""
+        db.execute(text("""
             CREATE TRIGGER trigger_calculate_total_cost
             BEFORE INSERT OR UPDATE ON bookings
             FOR EACH ROW
             EXECUTE FUNCTION calculate_total_cost();
         """))
+        db.commit()
