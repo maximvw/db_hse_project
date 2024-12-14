@@ -67,12 +67,10 @@ class MainWindow(QMainWindow):
         current_buttons = {self.layout.itemAt(i).widget().text(): self.button_functions[self.layout.itemAt(i).widget().text()] 
                            for i in range(self.layout.count()) 
                            if  self.layout.itemAt(i).widget() != self.back_button}
-        print(self.layout.itemAt(0))
-
         self.button_stack.append(current_buttons)
                 
-        self.add_btn.hide()
-        self.clear_tables_btn.hide()
+        self.add_btn.deleteLater()
+        self.clear_tables_btn.deleteLater()
 
         self.add_user_btn = QPushButton("Добавить пользователя")
         self.add_user_btn.clicked.connect(self.add_user)
