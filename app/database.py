@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy_utils import database_exists, create_database
 
 auth = {
     'user': 'postgres',
@@ -19,3 +20,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+if not database_exists(engine.url):
+    create_database(engine.url)
