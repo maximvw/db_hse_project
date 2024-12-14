@@ -18,7 +18,7 @@ class Service(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     service_name = Column(String, nullable=False, unique=True)
-    price_per_hour = Column(Float, nullable=False)
+    price_per_hour = Column(Integer, nullable=False)
 
 
 class Schedule(Base):

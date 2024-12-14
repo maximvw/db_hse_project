@@ -1,6 +1,8 @@
 from PyQt6.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QWidget, QMessageBox, QApplication, QDialog, QLineEdit, QLabel, QDialogButtonBox
-from app.handlers import add_user, clear_tables
+from app.handlers import add_user, add_schedule, add_service, add_booking, clear_tables, clear_user, clear_service, clear_booking, clear_schedule
 from app.database import get_db
+from datetime import date, time, datetime
+
 
 
 class InputDialog(QDialog):
@@ -41,7 +43,7 @@ class MainWindow(QMainWindow):
         
         self.button_functions = {
             "Добавить": self.replace_add_button,
-            "Очистить таблицы": self.clear_tables,
+            "Очистить таблицы": self.replace_clear_table_button,
         }
         
         self.add_btn = QPushButton("Добавить")
@@ -49,7 +51,7 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(self.add_btn)
 
         self.clear_tables_btn = QPushButton("Очистить таблицы")
-        self.clear_tables_btn.clicked.connect(self.clear_tables)
+        self.clear_tables_btn.clicked.connect(self.replace_clear_table_button)
         self.layout.addWidget(self.clear_tables_btn)
 
         container = QWidget()
@@ -77,19 +79,52 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(self.add_user_btn)
 
         self.add_service_btn = QPushButton("Добавить услугу")
-        self.add_service_btn.clicked.connect(self.add_user)
+        self.add_service_btn.clicked.connect(self.add_service)
         self.layout.addWidget(self.add_service_btn)
         
         self.add_schedule_btn = QPushButton("Добавить расписание")
-        self.add_schedule_btn.clicked.connect(self.add_user)
+        self.add_schedule_btn.clicked.connect(self.add_schedule)
         self.layout.addWidget(self.add_schedule_btn)
         
         self.add_booking_btn = QPushButton("Добавить бронирование")
-        self.add_booking_btn.clicked.connect(self.add_user)
+        self.add_booking_btn.clicked.connect(self.add_booking)
         self.layout.addWidget(self.add_booking_btn)
         
         self.back_button.setEnabled(True)
     
+    def replace_clear_table_button(self):
+        current_buttons = {self.layout.itemAt(i).widget().text(): self.button_functions[self.layout.itemAt(i).widget().text()] 
+                           for i in range(self.layout.count()) 
+                           if  self.layout.itemAt(i).widget() != self.back_button}
+        self.button_stack.append(current_buttons)
+                
+        self.add_btn.deleteLater()
+        self.clear_tables_btn.deleteLater()
+        
+        self.clear_all_btn = QPushButton("Очистить все таблицы")
+        self.clear_all_btn.clicked.connect(self.clear_tables)
+        self.layout.addWidget(self.clear_all_btn)
+
+
+        self.clear_user_btn = QPushButton("Очистить таблицу пользователей")
+        self.clear_user_btn.clicked.connect(self.clear_user)
+        self.layout.addWidget(self.clear_user_btn)
+
+        self.clear_service_btn = QPushButton("Очистить таблицу услуг")
+        self.clear_service_btn.clicked.connect(self.clear_service)
+        self.layout.addWidget(self.clear_service_btn)
+
+        
+        self.clear_schedule_btn = QPushButton("Очистить таблицу расписания")
+        self.clear_schedule_btn.clicked.connect(self.clear_schedule)
+        self.layout.addWidget(self.clear_schedule_btn)
+        
+        self.clear_booking_btn = QPushButton("Очистить таблицу бронирования")
+        self.clear_booking_btn.clicked.connect(self.clear_booking)
+        self.layout.addWidget(self.clear_booking_btn)
+        
+        self.back_button.setEnabled(True)
+
     def go_back(self):
         if self.button_stack:
             # Удаляем текущие кнопки (кроме кнопки "Назад")
@@ -123,8 +158,70 @@ class MainWindow(QMainWindow):
                     QMessageBox.information(self, "Успех", "Пользователь добавлен!")
                 except TypeError:
                     QMessageBox.information(self, "Неудача", "Неправильные аргументы")
+                    
+    def add_service(self):
+        dialog = InputDialog()
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            user_input = dialog.get_input()
+            with next(get_db()) as db:
+                try:
+                    add_service(db, *user_input.split(' '))
+                    QMessageBox.information(self, "Успех", "Услуга добавлена!")
+                except TypeError:
+                    QMessageBox.information(self, "Неудача", "Неправильные аргументы")
+
+    def add_schedule(self):
+        dialog = InputDialog()
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            user_input = dialog.get_input()
+            with next(get_db()) as db:
+                try:
+                    parts = user_input.split()
+                    trainer_id = int(parts[0])
+                    service_id = int(parts[1])
+                    date_str = parts[2].split(".")  # Преобразуем дату в формате "DD.MM.YYYY"
+                    schedule_date = date(int(date_str[2]), int(date_str[1]), int(date_str[0]))
+                    start_time_str = parts[3]
+                    end_time_str = parts[4]
+                    start_time = datetime.strptime(start_time_str, "%H:%M").time()  # Преобразуем строку в формат времени
+                    end_time = datetime.strptime(end_time_str, "%H:%M").time()
+                    add_schedule(db, trainer_id, service_id, schedule_date, start_time, end_time)
+                    QMessageBox.information(self, "Успех", "Расписание добавлено!")
+                except Exception as e:
+                    QMessageBox.information(self, "Неудача", f"Неправильные аргументы {e}")
+
+    def add_booking(self):
+        dialog = InputDialog()
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            user_input = dialog.get_input()
+            with next(get_db()) as db:
+                try:
+                    add_booking(db, *user_input.split(' '))
+                    QMessageBox.information(self, "Успех", "Бронирование добавлено!")
+                except TypeError:
+                    QMessageBox.information(self, "Неудача", "Неправильные аргументы")
 
     def clear_tables(self):
         with next(get_db()) as db:
             clear_tables(db)
             QMessageBox.information(self, "Успех", "Таблицы очищены!")
+
+    def clear_user(self):
+        with next(get_db()) as db:
+            clear_user(db)
+            QMessageBox.information(self, "Успех", "Таблица пользователей очищена!")
+
+    def clear_service(self):
+        with next(get_db()) as db:
+            clear_service(db)
+            QMessageBox.information(self, "Успех", "Таблица услуг очищена!")
+
+    def clear_schedule(self):
+        with next(get_db()) as db:
+            clear_schedule(db)
+            QMessageBox.information(self, "Успех", "Таблица расписания очищена!")
+
+    def clear_booking(self):
+        with next(get_db()) as db:
+            clear_booking(db)
+            QMessageBox.information(self, "Успех", "Таблица бронирования очищена!")
