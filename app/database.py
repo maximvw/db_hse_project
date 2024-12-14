@@ -1,7 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = "postgresql+psycopg2://postgres:1234@localhost/fitness_booking"
+auth = {
+    'user': 'postgres',
+    'password': '1234'
+}
+
+DATABASE_URL = f"postgresql+psycopg2://{auth['user']}:{auth['password']}@localhost/fitness_booking"
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

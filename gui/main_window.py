@@ -1,8 +1,11 @@
-from PyQt6.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QWidget, QMessageBox, QApplication, QDialog, QLineEdit, QLabel, QDialogButtonBox
-from app.handlers import add_user, add_schedule, add_service, add_booking, clear_tables, clear_user, clear_service, clear_booking, clear_schedule
-from app.database import get_db
-from datetime import date, time, datetime
+from datetime import date, datetime
 
+from PyQt6.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QWidget, QMessageBox, QDialog, QLineEdit, QLabel, \
+    QDialogButtonBox
+
+from app.database import get_db
+from app.handlers import add_user, add_schedule, add_service, add_booking, clear_tables, clear_user, clear_service, \
+    clear_booking, clear_schedule
 
 
 class InputDialog(QDialog):
@@ -40,12 +43,12 @@ class MainWindow(QMainWindow):
         self.layout = QVBoxLayout()
 
         self.button_stack = []
-        
+
         self.button_functions = {
             "Добавить": self.replace_add_button,
             "Очистить таблицы": self.replace_clear_table_button,
         }
-        
+
         self.add_btn = QPushButton("Добавить")
         self.add_btn.clicked.connect(self.replace_add_button)
         self.layout.addWidget(self.add_btn)
@@ -57,20 +60,21 @@ class MainWindow(QMainWindow):
         container = QWidget()
         container.setLayout(self.layout)
         self.setCentralWidget(container)
-        
+
         self.back_button = QPushButton("Назад")
         self.back_button.clicked.connect(self.go_back)
         self.back_button.setEnabled(False)  # Сначала отключена
 
         # Добавляем кнопку "Назад" в layout
         self.layout.addWidget(self.back_button)
-        
+
     def replace_add_button(self):
-        current_buttons = {self.layout.itemAt(i).widget().text(): self.button_functions[self.layout.itemAt(i).widget().text()] 
-                           for i in range(self.layout.count()) 
-                           if  self.layout.itemAt(i).widget() != self.back_button}
+        current_buttons = {
+            self.layout.itemAt(i).widget().text(): self.button_functions[self.layout.itemAt(i).widget().text()]
+            for i in range(self.layout.count())
+            if self.layout.itemAt(i).widget() != self.back_button}
         self.button_stack.append(current_buttons)
-                
+
         self.add_btn.deleteLater()
         self.clear_tables_btn.deleteLater()
 
@@ -81,30 +85,30 @@ class MainWindow(QMainWindow):
         self.add_service_btn = QPushButton("Добавить услугу")
         self.add_service_btn.clicked.connect(self.add_service)
         self.layout.addWidget(self.add_service_btn)
-        
+
         self.add_schedule_btn = QPushButton("Добавить расписание")
         self.add_schedule_btn.clicked.connect(self.add_schedule)
         self.layout.addWidget(self.add_schedule_btn)
-        
+
         self.add_booking_btn = QPushButton("Добавить бронирование")
         self.add_booking_btn.clicked.connect(self.add_booking)
         self.layout.addWidget(self.add_booking_btn)
-        
+
         self.back_button.setEnabled(True)
-    
+
     def replace_clear_table_button(self):
-        current_buttons = {self.layout.itemAt(i).widget().text(): self.button_functions[self.layout.itemAt(i).widget().text()] 
-                           for i in range(self.layout.count()) 
-                           if  self.layout.itemAt(i).widget() != self.back_button}
+        current_buttons = {
+            self.layout.itemAt(i).widget().text(): self.button_functions[self.layout.itemAt(i).widget().text()]
+            for i in range(self.layout.count())
+            if self.layout.itemAt(i).widget() != self.back_button}
         self.button_stack.append(current_buttons)
-                
+
         self.add_btn.deleteLater()
         self.clear_tables_btn.deleteLater()
-        
+
         self.clear_all_btn = QPushButton("Очистить все таблицы")
         self.clear_all_btn.clicked.connect(self.clear_tables)
         self.layout.addWidget(self.clear_all_btn)
-
 
         self.clear_user_btn = QPushButton("Очистить таблицу пользователей")
         self.clear_user_btn.clicked.connect(self.clear_user)
@@ -114,15 +118,14 @@ class MainWindow(QMainWindow):
         self.clear_service_btn.clicked.connect(self.clear_service)
         self.layout.addWidget(self.clear_service_btn)
 
-        
         self.clear_schedule_btn = QPushButton("Очистить таблицу расписания")
         self.clear_schedule_btn.clicked.connect(self.clear_schedule)
         self.layout.addWidget(self.clear_schedule_btn)
-        
+
         self.clear_booking_btn = QPushButton("Очистить таблицу бронирования")
         self.clear_booking_btn.clicked.connect(self.clear_booking)
         self.layout.addWidget(self.clear_booking_btn)
-        
+
         self.back_button.setEnabled(True)
 
     def go_back(self):
@@ -158,7 +161,7 @@ class MainWindow(QMainWindow):
                     QMessageBox.information(self, "Успех", "Пользователь добавлен!")
                 except TypeError:
                     QMessageBox.information(self, "Неудача", "Неправильные аргументы")
-                    
+
     def add_service(self):
         dialog = InputDialog()
         if dialog.exec() == QDialog.DialogCode.Accepted:
@@ -183,7 +186,8 @@ class MainWindow(QMainWindow):
                     schedule_date = date(int(date_str[2]), int(date_str[1]), int(date_str[0]))
                     start_time_str = parts[3]
                     end_time_str = parts[4]
-                    start_time = datetime.strptime(start_time_str, "%H:%M").time()  # Преобразуем строку в формат времени
+                    start_time = datetime.strptime(start_time_str,
+                                                   "%H:%M").time()  # Преобразуем строку в формат времени
                     end_time = datetime.strptime(end_time_str, "%H:%M").time()
                     add_schedule(db, trainer_id, service_id, schedule_date, start_time, end_time)
                     QMessageBox.information(self, "Успех", "Расписание добавлено!")

@@ -3,47 +3,42 @@ from datetime import date, time
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.models import User, Service, Schedule, Booking
+# from app.models import User, Service, Schedule, Booking
 
 
 def add_user(db: Session, name: str, phone: str, role: str):
     try:
-        # new_user = User(name=name, phone=phone, role=role)
-        # db.add(new_user)
-
-        db.execute(text("CALL add_user(:p1, :p2, :p3)"), {"p1": name, "p2": phone, "p3": role})
-
+        db.execute(text("CALL add_user(:name, :phone, :role)"), {"name": name, "phone": phone, "role": role})
         db.commit()
     except Exception as e:
         db.rollback()
         raise e
 
 
-def add_service(db: Session, name: str, price: str):
+def add_service(db: Session, name: str, price: int):
     try:
-        new_service = Service(service_name=name, price_per_hour=int(price))
-        db.add(new_service)
+        db.execute(text("CALL add_service(:name, :price)"), {"name": name, "price": price})
         db.commit()
     except Exception as e:
         db.rollback()
         raise e
 
 
-def add_schedule(db: Session, trainer_id: int, service_id: int, date_: date, start_time: time, end_time: time):
+def add_schedule(db: Session, trainer_id: int, service_id: int, date_calendar: date, start_time: time, end_time: time):
     try:
-        new_schedule = Schedule(trainer_id=trainer_id, service_id=service_id, date=date_, start_time=start_time,
-                                end_time=end_time)
-        db.add(new_schedule)
+        db.execute(text("CALL add_service(:trainer_id, :service_id, :date_calendar, :start_time, :end_time)"),
+                   {"trainer_id": trainer_id, "service_id": service_id, "date_calendar": date_calendar,
+                    "start_time": start_time, "end_time": end_time})
         db.commit()
     except Exception as e:
         db.rollback()
         raise e
 
 
-def add_booking(db: Session, client_id: str, schedule_id: str, total_cost: str = None):
+def add_booking(db: Session, client_id: str, schedule_id: str, total_cost: float = 0):
     try:
-        new_booking = Booking(client_id=int(client_id), schedule_id=int(schedule_id), total_cost=0)
-        db.add(new_booking)
+        db.execute(text("CALL add_service(:client_id, :schedule_id, :total_cost)"),
+                   {"client_id": client_id, "schedule_id": schedule_id, "total_cost": total_cost})
         db.commit()
     except Exception as e:
         db.rollback()
@@ -69,6 +64,7 @@ def clear_tables(db: Session):
 def clear_booking(db: Session):
     try:
         db.query(Booking).delete()
+        db.commit()
     except Exception as e:
         db.rollback()
         raise e
@@ -77,6 +73,7 @@ def clear_booking(db: Session):
 def clear_schedule(db: Session):
     try:
         db.query(Schedule).delete()
+        db.commit()
     except Exception as e:
         db.rollback()
         raise e
@@ -85,6 +82,7 @@ def clear_schedule(db: Session):
 def clear_user(db: Session):
     try:
         db.query(User).delete()
+        db.commit()
     except Exception as e:
         db.rollback()
         raise e
@@ -93,6 +91,7 @@ def clear_user(db: Session):
 def clear_service(db: Session):
     try:
         db.query(Service).delete()
+        db.commit()
     except Exception as e:
         db.rollback()
         raise e

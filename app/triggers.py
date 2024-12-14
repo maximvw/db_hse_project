@@ -23,7 +23,7 @@ def create_triggers():
 
         db.execute(text("""
             CREATE TRIGGER trigger_calculate_total_cost
-            BEFORE INSERT OR UPDATE ON bookings
+            AFTER INSERT OR UPDATE ON bookings
             FOR EACH ROW
             EXECUTE FUNCTION calculate_total_cost();
         """))
