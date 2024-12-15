@@ -88,7 +88,10 @@ class MainWindow(QMainWindow):
         self.button_functions = {
             "Добавить": self.replace_add_button,
             "Очистить таблицы": self.replace_clear_table_button,
-            "Вывести содержимое таблиц": self.load_data
+            "Вывести содержимое таблиц": self.replace_load_data_button,
+            "Поиск по текстовому полю": self.search_data,
+            "Обновить запись": self.update_record,
+            "Удалить по текстовому полю": self.delete_by_field
         }
 
         self.add_btn = QPushButton("Добавить")
@@ -116,7 +119,7 @@ class MainWindow(QMainWindow):
 
         # Работа с таблицами
         self.load_data_btn = QPushButton("Вывести содержимое таблиц")
-        self.load_data_btn.clicked.connect(self.load_data)
+        self.load_data_btn.clicked.connect(self.replace_load_data_button)
         self.layout.addWidget(self.load_data_btn)
 
         # self.show_users_btn = QPushButton("Вывести пользователей")
@@ -167,6 +170,9 @@ class MainWindow(QMainWindow):
         self.add_btn.deleteLater()
         self.clear_tables_btn.deleteLater()
         self.load_data_btn.deleteLater()
+        self.search_btn.deleteLater()
+        self.update_btn.deleteLater()
+        self.delete_by_field_btn.deleteLater()
 
         self.add_user_btn = QPushButton("Добавить пользователя")
         self.add_user_btn.clicked.connect(self.add_user)
@@ -196,6 +202,10 @@ class MainWindow(QMainWindow):
         self.add_btn.deleteLater()
         self.clear_tables_btn.deleteLater()
         self.load_data_btn.deleteLater()
+        self.search_btn.deleteLater()
+        self.update_btn.deleteLater()
+        self.delete_by_field_btn.deleteLater()
+
 
         self.clear_all_btn = QPushButton("Очистить все таблицы")
         self.clear_all_btn.clicked.connect(self.clear_tables)
@@ -218,6 +228,40 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(self.clear_booking_btn)
 
         self.back_button.setEnabled(True)
+        
+    def replace_load_data_button(self):
+        current_buttons = {
+            self.layout.itemAt(i).widget().text(): self.button_functions[self.layout.itemAt(i).widget().text()]
+            for i in range(self.layout.count())
+            if self.layout.itemAt(i).widget() != self.back_button}
+        self.button_stack.append(current_buttons)
+
+        self.add_btn.deleteLater()
+        self.clear_tables_btn.deleteLater()
+        self.load_data_btn.deleteLater()
+        self.search_btn.deleteLater()
+        self.update_btn.deleteLater()
+        self.delete_by_field_btn.deleteLater()
+
+
+        self.load_users_btn = QPushButton("Вывести таблицу пользователей")
+        self.load_users_btn.clicked.connect(lambda x: self.load_data("users"))
+        self.layout.addWidget(self.load_users_btn)
+
+        self.load_services_btn = QPushButton("Вывести таблицу услуг")
+        self.load_services_btn.clicked.connect(lambda x: self.load_data("services"))
+        self.layout.addWidget(self.load_services_btn)
+
+        self.load_schedule_btn = QPushButton("Вывести таблицу расписания")
+        self.load_schedule_btn.clicked.connect(lambda x: self.load_data("schedule"))
+        self.layout.addWidget(self.load_schedule_btn)
+
+        self.load_booking_btn = QPushButton("Вывести таблицу бронирования")
+        self.load_booking_btn.clicked.connect(lambda x: self.load_data("bookings"))
+        self.layout.addWidget(self.load_booking_btn)
+
+        self.back_button.setEnabled(True)
+        
 
     def go_back(self):
         if self.button_stack:
@@ -240,6 +284,13 @@ class MainWindow(QMainWindow):
                 if button_text == "Вывести содержимое таблиц":
                     self.load_data_btn = button
                     self.table_widget = QTableWidget()
+                if button_text == "Поиск по текстовому полю":
+                    self.search_btn = button
+                if button_text == "Обновить запись":
+                    self.update_btn = button
+                if button_text == "Удалить по текстовому полю":
+                    self.delete_by_field_btn = button
+                
 
             # Если стек пуст, отключаем кнопку "Назад", иначе оставляем включенной
             if not self.button_stack:
@@ -327,30 +378,15 @@ class MainWindow(QMainWindow):
             clear_booking(db)
             QMessageBox.information(self, "Успех", "Таблица бронирования очищена!")
 
-    def load_data(self):
-        dialog = InputDialog(("Введите имя таблицы",))
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            user_input = dialog.get_input()[0]
+    def load_data(self, table_name):
+        self.layout.addWidget(self.table_widget)
+        with next(get_db()) as db:
+            try:
+                data, header = get_table_data(db, table_name)
+                self.display_table(data, header)
+            except Exception as e:
+                QMessageBox.critical(self, "Ошибка", str(e))
 
-            current_buttons = {
-                self.layout.itemAt(i).widget().text(): self.button_functions[self.layout.itemAt(i).widget().text()]
-                for i in range(self.layout.count())
-                if self.layout.itemAt(i).widget() != self.back_button}
-            self.button_stack.append(current_buttons)
-
-            self.add_btn.deleteLater()
-            self.clear_tables_btn.deleteLater()
-            self.load_data_btn.deleteLater()
-            self.layout.addWidget(self.table_widget)
-
-            with next(get_db()) as db:
-                try:
-                    data, header = get_table_data(db, user_input)
-                    self.display_table(data, header)
-                except Exception as e:
-                    QMessageBox.critical(self, "Ошибка", str(e))
-
-        self.back_button.setEnabled(True)
 
     def display_table(self, data, headers):
         self.table_widget.setRowCount(len(data))
