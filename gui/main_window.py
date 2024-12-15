@@ -1,10 +1,14 @@
 from datetime import date, datetime
 
-from PyQt6.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QWidget, QMessageBox, QDialog, QLineEdit, QLabel, \
+from PyQt6.QtWidgets import QDialog, QLabel, \
     QDialogButtonBox
+from PyQt6.QtWidgets import (
+    QMainWindow, QPushButton, QVBoxLayout, QWidget, QMessageBox, QTableWidget, QTableWidgetItem, QLineEdit
+)
+
 from app.database import get_db
 from app.handlers import add_user, add_schedule, add_service, add_booking, clear_tables, clear_user, clear_service, \
-    clear_booking, clear_schedule
+    clear_booking, clear_schedule, get_table_data
 
 
 class InputDialog(QDialog):
@@ -27,7 +31,7 @@ class InputDialog(QDialog):
         button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
-        
+
         # Устанавливаем self.layout
         self.layout = QVBoxLayout()
         # for label in self.labels:
@@ -60,7 +64,6 @@ class InputDialog(QDialog):
 
         self.layout.addWidget(button_box)
         self.setLayout(self.layout)
-        
 
     def get_input(self):
         return [input_line.text() for input_line in self.input_lines]
@@ -72,6 +75,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Fitness Booking")
         self.setGeometry(100, 100, 800, 600)
 
+        self.table_widget = QTableWidget()
         self.layout = QVBoxLayout()
 
         self.button_stack = []
@@ -85,6 +89,11 @@ class MainWindow(QMainWindow):
         self.add_btn.clicked.connect(self.replace_add_button)
         self.layout.addWidget(self.add_btn)
 
+        # Работа с таблицами
+        self.load_data_btn = QPushButton("Вывести содержимое таблиц")
+        self.load_data_btn.clicked.connect(self.load_data)
+        self.layout.addWidget(self.load_data_btn)
+
         self.clear_tables_btn = QPushButton("Очистить таблицы")
         self.clear_tables_btn.clicked.connect(self.replace_clear_table_button)
         self.layout.addWidget(self.clear_tables_btn)
@@ -92,14 +101,14 @@ class MainWindow(QMainWindow):
         container = QWidget()
         container.setLayout(self.layout)
         self.setCentralWidget(container)
-        
+
         self.setStyleSheet("""
             QMainWindow {
                 background-color: #2e2e2e;
             }
 
             QLabel {
-                color: white;
+                color: blue;
                 font-size: 18px;
                 margin: 10px;
             }
@@ -231,7 +240,8 @@ class MainWindow(QMainWindow):
                     QMessageBox.information(self, "Неудача", "Неправильные аргументы")
 
     def add_schedule(self):
-        dialog = InputDialog(("Введите id тренера", "Введите id услуги", "Введите дату", "Введите время начала", "Введите время конца"))
+        dialog = InputDialog(
+            ("Введите id тренера", "Введите id услуги", "Введите дату", "Введите время начала", "Введите время конца"))
         if dialog.exec() == QDialog.DialogCode.Accepted:
             user_input = dialog.get_input()
             with next(get_db()) as db:
@@ -287,3 +297,20 @@ class MainWindow(QMainWindow):
         with next(get_db()) as db:
             clear_booking(db)
             QMessageBox.information(self, "Успех", "Таблица бронирования очищена!")
+
+    def load_data(self):
+        with next(get_db()) as db:
+            try:
+                data = get_table_data(db, "users")  # Пример для таблицы "users"
+                self.display_table(data, ["id", "name", "phone", "role"])
+            except Exception as e:
+                QMessageBox.critical(self, "Ошибка", str(e))
+
+    def display_table(self, data, headers):
+        self.table_widget.setRowCount(len(data))
+        self.table_widget.setColumnCount(len(headers))
+        self.table_widget.setHorizontalHeaderLabels(headers)
+        for row_idx, row_data in enumerate(data):
+            for col_idx, value in enumerate(row_data):
+                print(row_idx, col_idx, value)
+                self.table_widget.setItem(row_idx, col_idx, QTableWidgetItem(str(value)))

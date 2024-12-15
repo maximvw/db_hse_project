@@ -48,6 +48,9 @@ def add_booking(db: Session, client_id: int, schedule_id: int, total_cost: float
 def get_users(db: Session):
     return db.query(User).all()
 
+def get_table_data(db: Session, table_name: str):
+    return db.execute(text(f"SELECT * FROM {table_name}")).fetchall()
+
 
 def clear_tables(db: Session):
     try:
