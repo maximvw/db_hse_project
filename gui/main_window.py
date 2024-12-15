@@ -168,7 +168,8 @@ class MainWindow(QMainWindow):
             user_input = dialog.get_input()
             with next(get_db()) as db:
                 try:
-                    add_service(db, *user_input.split(' '))
+                    s_name, s_price = user_input.split(' ')[0], int(user_input.split(' ')[1])
+                    add_service(db, s_name, s_price)
                     QMessageBox.information(self, "Успех", "Услуга добавлена!")
                 except TypeError:
                     QMessageBox.information(self, "Неудача", "Неправильные аргументы")
@@ -182,13 +183,19 @@ class MainWindow(QMainWindow):
                     parts = user_input.split()
                     trainer_id = int(parts[0])
                     service_id = int(parts[1])
-                    date_str = parts[2].split(".")  # Преобразуем дату в формате "DD.MM.YYYY"
+                    date_str = parts[2].split(".")  # Преобразуем дату в формате "Y.M.D"
                     schedule_date = date(int(date_str[2]), int(date_str[1]), int(date_str[0]))
                     start_time_str = parts[3]
                     end_time_str = parts[4]
                     start_time = datetime.strptime(start_time_str,
                                                    "%H:%M").time()  # Преобразуем строку в формат времени
                     end_time = datetime.strptime(end_time_str, "%H:%M").time()
+                    # trainer_id = int(parts[0])
+                    # service_id = int(parts[1])
+                    # date_str = parts[2]  # Преобразуем дату в формате "DD.MM.YYYY"
+                    # schedule_date = date_str
+                    # start_time = parts[3]
+                    # end_time = parts[4]
                     add_schedule(db, trainer_id, service_id, schedule_date, start_time, end_time)
                     QMessageBox.information(self, "Успех", "Расписание добавлено!")
                 except Exception as e:
@@ -200,7 +207,9 @@ class MainWindow(QMainWindow):
             user_input = dialog.get_input()
             with next(get_db()) as db:
                 try:
-                    add_booking(db, *user_input.split(' '))
+                    client_id, schedule_id = map(int, user_input.split(' '))
+                    print(client_id, schedule_id)
+                    add_booking(db, client_id, schedule_id)
                     QMessageBox.information(self, "Успех", "Бронирование добавлено!")
                 except TypeError:
                     QMessageBox.information(self, "Неудача", "Неправильные аргументы")

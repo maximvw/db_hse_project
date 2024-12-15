@@ -15,7 +15,7 @@ def create_procedures():
         """))
 
         db.execute(text("""
-            CREATE OR REPLACE PROCEDURE add_service(name TEXT, price TEXT)
+            CREATE OR REPLACE PROCEDURE add_service(name TEXT, price INTEGER)
             LANGUAGE plpgsql AS $$
             BEGIN
                 INSERT INTO services (service_name, price_per_hour) VALUES (name, price);
@@ -39,7 +39,7 @@ def create_procedures():
             LANGUAGE plpgsql AS $$
             BEGIN
                 INSERT INTO bookings (client_id, schedule_id)
-                              VALUES (trainer_id, service_id);
+                              VALUES (client_id, schedule_id);
             END;
             $$;
         """))

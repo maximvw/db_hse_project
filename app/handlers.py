@@ -26,7 +26,7 @@ def add_service(db: Session, name: str, price: int):
 
 def add_schedule(db: Session, trainer_id: int, service_id: int, date_calendar: date, start_time: time, end_time: time):
     try:
-        db.execute(text("CALL add_service(:trainer_id, :service_id, :date_calendar, :start_time, :end_time)"),
+        db.execute(text("CALL add_schedule(:trainer_id, :service_id, :date_calendar, :start_time, :end_time)"),
                    {"trainer_id": trainer_id, "service_id": service_id, "date_calendar": date_calendar,
                     "start_time": start_time, "end_time": end_time})
         db.commit()
@@ -35,10 +35,10 @@ def add_schedule(db: Session, trainer_id: int, service_id: int, date_calendar: d
         raise e
 
 
-def add_booking(db: Session, client_id: str, schedule_id: str, total_cost: float = 0):
+def add_booking(db: Session, client_id: int, schedule_id: int, total_cost: float = 0):
     try:
-        db.execute(text("CALL add_service(:client_id, :schedule_id, :total_cost)"),
-                   {"client_id": client_id, "schedule_id": schedule_id, "total_cost": total_cost})
+        db.execute(text("CALL add_booking(:client_id, :schedule_id)"),
+                   {"client_id": client_id, "schedule_id": schedule_id})
         db.commit()
     except Exception as e:
         db.rollback()

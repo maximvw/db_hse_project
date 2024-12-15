@@ -5,7 +5,12 @@ from app.database import get_db
 
 def create_tables():
     with next(get_db()) as db:
-
+        # db.execute(text("""
+        #     DROP TABLE users CASCADE;
+        #     DROP TABLE services CASCADE;
+        #     DROP TABLE schedule CASCADE;
+        #     DROP TABLE bookings CASCADE;
+        # """))
 
 
         db.execute(text("""
@@ -20,14 +25,14 @@ def create_tables():
             CREATE TABLE if not exists services(
                 id bigserial PRIMARY KEY,
                 service_name VARCHAR(255) NOT NULL UNIQUE,
-                price_per_hour DECIMAL(10, 2) NOT NULL
+                price_per_hour INTEGER NOT NULL
             );
 
             CREATE TABLE if not exists schedule(
                 id bigserial PRIMARY KEY,
                 trainer_id INT NOT NULL,
                 service_id INT NOT NULL,
-                date DATE NOT NULL,
+                date_calendar DATE NOT NULL,
                 start_time TIME NOT NULL,
                 end_time TIME NOT NULL,
                 FOREIGN KEY (trainer_id) REFERENCES Users(id),
