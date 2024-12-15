@@ -223,6 +223,7 @@ class MainWindow(QMainWindow):
                     self.clear_tables_btn = button
                 if button_text == "Вывести содержимое таблиц":
                     self.load_data_btn = button
+                    self.table_widget = QTableWidget()
 
             # Если стек пуст, отключаем кнопку "Назад", иначе оставляем включенной
             if not self.button_stack:
