@@ -108,3 +108,14 @@ def clear_service(db: Session):
     except Exception as e:
         db.rollback()
         raise e
+
+# def show_users(db: Session):
+#     try:
+#         rows = db.execute(text("""
+#             SELECT * FROM users;
+#         """))
+#         db.commit()
+#         return rows
+#     except Exception as e:
+#         db.rollback()
+#         raise e

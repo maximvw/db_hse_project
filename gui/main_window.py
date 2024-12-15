@@ -57,6 +57,10 @@ class InputDialog(QDialog):
                 border-radius: 5px;
             }
 
+            QLineEdit {
+                color: black;
+            }
+            
             QPushButton:hover {
                 background-color: #0056a1;
             }
@@ -83,6 +87,7 @@ class MainWindow(QMainWindow):
         self.button_functions = {
             "Добавить": self.replace_add_button,
             "Очистить таблицы": self.replace_clear_table_button,
+            "Вывести содержимое таблиц": self.load_data
         }
 
         self.add_btn = QPushButton("Добавить")
@@ -98,6 +103,10 @@ class MainWindow(QMainWindow):
         self.clear_tables_btn.clicked.connect(self.replace_clear_table_button)
         self.layout.addWidget(self.clear_tables_btn)
 
+        # self.show_users_btn = QPushButton("Вывести пользователей")
+        # self.show_users_btn.clicked.connect(self.show_users)
+        # self.layout.addWidget(self.show_users_btn)
+        
         container = QWidget()
         container.setLayout(self.layout)
         self.setCentralWidget(container)
@@ -129,7 +138,6 @@ class MainWindow(QMainWindow):
         self.back_button = QPushButton("Назад")
         self.back_button.clicked.connect(self.go_back)
         self.back_button.setEnabled(False)  # Сначала отключена
-
         # Добавляем кнопку "Назад" в layout
         self.layout.addWidget(self.back_button)
 
@@ -142,6 +150,7 @@ class MainWindow(QMainWindow):
 
         self.add_btn.deleteLater()
         self.clear_tables_btn.deleteLater()
+        self.load_data_btn.deleteLater()
 
         self.add_user_btn = QPushButton("Добавить пользователя")
         self.add_user_btn.clicked.connect(self.add_user)
@@ -170,6 +179,7 @@ class MainWindow(QMainWindow):
 
         self.add_btn.deleteLater()
         self.clear_tables_btn.deleteLater()
+        self.load_data_btn.deleteLater()
 
         self.clear_all_btn = QPushButton("Очистить все таблицы")
         self.clear_all_btn.clicked.connect(self.clear_tables)
@@ -211,6 +221,8 @@ class MainWindow(QMainWindow):
                     self.add_btn = button
                 if button_text == "Очистить таблицы":
                     self.clear_tables_btn = button
+                if button_text == "Вывести содержимое таблиц":
+                    self.load_data_btn = button
 
             # Если стек пуст, отключаем кнопку "Назад", иначе оставляем включенной
             if not self.button_stack:
@@ -314,3 +326,25 @@ class MainWindow(QMainWindow):
             for col_idx, value in enumerate(row_data):
                 print(row_idx, col_idx, value)
                 self.table_widget.setItem(row_idx, col_idx, QTableWidgetItem(str(value)))
+
+    def load_data(self):
+        with next(get_db()) as db:
+            try:
+                data = get_table_data(db, "users")  # Пример для таблицы "users"
+                self.display_table(data, ["id", "name", "phone", "role"])
+            except Exception as e:
+                QMessageBox.critical(self, "Ошибка", str(e))
+
+    def display_table(self, data, headers):
+        self.table_widget.setRowCount(len(data))
+        self.table_widget.setColumnCount(len(headers))
+        self.table_widget.setHorizontalHeaderLabels(headers)
+        for row_idx, row_data in enumerate(data):
+            for col_idx, value in enumerate(row_data):
+                print(row_idx, col_idx, value)
+                self.table_widget.setItem(row_idx, col_idx, QTableWidgetItem(str(value)))
+
+    # def show_users(self):
+    #     with next(get_db()) as db:
+    #         for row in show_users(db):
+    #             QMessageBox.information(self, "Успех", str(row))
