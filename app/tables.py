@@ -35,8 +35,8 @@ def create_tables():
                 date_calendar DATE NOT NULL,
                 start_time TIME NOT NULL,
                 end_time TIME NOT NULL,
-                FOREIGN KEY (trainer_id) REFERENCES Users(id),
-                FOREIGN KEY (service_id) REFERENCES Services(id)
+                FOREIGN KEY (trainer_id) REFERENCES Users(id) ON DELETE CASCADE,
+                FOREIGN KEY (service_id) REFERENCES Services(id) ON DELETE CASCADE
             );
 
             CREATE TABLE if not exists bookings(
@@ -44,8 +44,8 @@ def create_tables():
                 client_id INT NOT NULL,
                 schedule_id INT NOT NULL,
                 total_cost DECIMAL(10, 2) DEFAULT 0,
-                FOREIGN KEY (client_id) REFERENCES Users(id),
-                FOREIGN KEY (schedule_id) REFERENCES Schedule(id)
+                FOREIGN KEY (client_id) REFERENCES Users(id) ON DELETE CASCADE,
+                FOREIGN KEY (schedule_id) REFERENCES Schedule(id) ON DELETE CASCADE
             );
 
             CREATE INDEX if not exists idx_service_name ON services(service_name);

@@ -51,10 +51,12 @@ def get_users(db: Session):
 
 def clear_tables(db: Session):
     try:
-        db.query(Booking).delete()
-        db.query(Schedule).delete()
-        db.query(User).delete()
-        db.query(Service).delete()
+        db.execute(text("""
+            TRUNCATE TABLE users CASCADE;
+            TRUNCATE TABLE services CASCADE;
+            TRUNCATE TABLE schedule CASCADE;
+            TRUNCATE TABLE bookings CASCADE;
+        """))
         db.commit()
     except Exception as e:
         db.rollback()
@@ -63,7 +65,9 @@ def clear_tables(db: Session):
 
 def clear_booking(db: Session):
     try:
-        db.query(Booking).delete()
+        db.execute(text("""
+            TRUNCATE TABLE bookings CASCADE;
+        """))
         db.commit()
     except Exception as e:
         db.rollback()
@@ -72,7 +76,9 @@ def clear_booking(db: Session):
 
 def clear_schedule(db: Session):
     try:
-        db.query(Schedule).delete()
+        db.execute(text("""
+            TRUNCATE TABLE schedule CASCADE;
+        """))
         db.commit()
     except Exception as e:
         db.rollback()
@@ -81,7 +87,9 @@ def clear_schedule(db: Session):
 
 def clear_user(db: Session):
     try:
-        db.query(User).delete()
+        db.execute(text("""
+            TRUNCATE TABLE users CASCADE;
+        """))
         db.commit()
     except Exception as e:
         db.rollback()
@@ -90,7 +98,9 @@ def clear_user(db: Session):
 
 def clear_service(db: Session):
     try:
-        db.query(Service).delete()
+        db.execute(text("""
+            TRUNCATE TABLE services CASCADE;
+        """))
         db.commit()
     except Exception as e:
         db.rollback()
