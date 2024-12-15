@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
 
 from app.database import get_db
 from app.handlers import add_user, add_schedule, add_service, add_booking, clear_tables, clear_user, clear_service, \
-    clear_booking, clear_schedule, get_table_data
+    clear_booking, clear_schedule, get_table_data, search_by_field, update_row, delete_by_field
 
 
 class InputDialog(QDialog):
@@ -80,6 +80,7 @@ class MainWindow(QMainWindow):
         self.setGeometry(100, 100, 800, 600)
 
         self.table_widget = QTableWidget()
+        self.search_field = QLineEdit()
         self.layout = QVBoxLayout()
 
         self.button_stack = []
@@ -97,6 +98,21 @@ class MainWindow(QMainWindow):
         self.clear_tables_btn = QPushButton("Очистить таблицы")
         self.clear_tables_btn.clicked.connect(self.replace_clear_table_button)
         self.layout.addWidget(self.clear_tables_btn)
+
+        # Поиск данных
+        self.search_btn = QPushButton("Поиск по текстовому полю")
+        self.search_btn.clicked.connect(self.search_data)
+        self.layout.addWidget(self.search_btn)
+
+        # Обновление данных
+        self.update_btn = QPushButton("Обновить запись")
+        self.update_btn.clicked.connect(self.update_record)
+        self.layout.addWidget(self.update_btn)
+
+        # Удаление данных
+        self.delete_by_field_btn = QPushButton("Удалить по текстовому полю")
+        self.delete_by_field_btn.clicked.connect(self.delete_by_field)
+        self.layout.addWidget(self.delete_by_field_btn)
 
         # Работа с таблицами
         self.load_data_btn = QPushButton("Вывести содержимое таблиц")
@@ -312,23 +328,27 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Успех", "Таблица бронирования очищена!")
 
     def load_data(self):
-        current_buttons = {
-            self.layout.itemAt(i).widget().text(): self.button_functions[self.layout.itemAt(i).widget().text()]
-            for i in range(self.layout.count())
-            if self.layout.itemAt(i).widget() != self.back_button}
-        self.button_stack.append(current_buttons)
+        dialog = InputDialog(("Введите имя таблицы",))
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            user_input = dialog.get_input()[0]
 
-        self.add_btn.deleteLater()
-        self.clear_tables_btn.deleteLater()
-        self.load_data_btn.deleteLater()
+            current_buttons = {
+                self.layout.itemAt(i).widget().text(): self.button_functions[self.layout.itemAt(i).widget().text()]
+                for i in range(self.layout.count())
+                if self.layout.itemAt(i).widget() != self.back_button}
+            self.button_stack.append(current_buttons)
 
-        self.layout.addWidget(self.table_widget)
-        with next(get_db()) as db:
-            try:
-                data = get_table_data(db, "users")  # Пример для таблицы "users"
-                self.display_table(data, ["id", "name", "phone", "role"])
-            except Exception as e:
-                QMessageBox.critical(self, "Ошибка", str(e))
+            self.add_btn.deleteLater()
+            self.clear_tables_btn.deleteLater()
+            self.load_data_btn.deleteLater()
+            self.layout.addWidget(self.table_widget)
+
+            with next(get_db()) as db:
+                try:
+                    data, header = get_table_data(db, user_input)
+                    self.display_table(data, header)
+                except Exception as e:
+                    QMessageBox.critical(self, "Ошибка", str(e))
 
         self.back_button.setEnabled(True)
 
@@ -337,9 +357,36 @@ class MainWindow(QMainWindow):
         self.table_widget.setColumnCount(len(headers))
         self.table_widget.setHorizontalHeaderLabels(headers)
         for row_idx, row_data in enumerate(data):
+            row_data = [col for col in row_data[0][1:-1].split(',')]
             for col_idx, value in enumerate(row_data):
-                print(row_idx, col_idx, value)
-                self.table_widget.setItem(row_idx, col_idx, QTableWidgetItem(str(value)))
+                self.table_widget.setItem(row_idx, col_idx, QTableWidgetItem(value))
+
+    def search_data(self):
+        dialog = InputDialog(("Введите имя",))
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            user_input = dialog.get_input()[0]
+            with next(get_db()) as db:
+                try:
+                    data, header = search_by_field(db, "users", "name", user_input)
+                    self.display_table(data, header)
+                except Exception as e:
+                    QMessageBox.critical(self, "Ошибка", str(e))
+
+    def update_record(self):
+        with next(get_db()) as db:
+            try:
+                update_row(db, "users", 1, {"name": "Пётр Петров"})  # Пример обновления
+                QMessageBox.information(self, "Успех", "Запись успешно обновлена.")
+            except Exception as e:
+                QMessageBox.critical(self, "Ошибка", str(e))
+
+    def delete_by_field(self):
+        with next(get_db()) as db:
+            try:
+                delete_by_field(db, "users", "name", "Иван Иванов")
+                QMessageBox.information(self, "Успех", "Запись успешно удалена.")
+            except Exception as e:
+                QMessageBox.critical(self, "Ошибка", str(e))
 
     # def show_users(self):
     #     with next(get_db()) as db:
