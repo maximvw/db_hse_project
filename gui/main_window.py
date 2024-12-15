@@ -106,7 +106,9 @@ class MainWindow(QMainWindow):
         # self.show_users_btn = QPushButton("Вывести пользователей")
         # self.show_users_btn.clicked.connect(self.show_users)
         # self.layout.addWidget(self.show_users_btn)
-        
+
+        self.layout.addWidget(self.table_widget)
+
         container = QWidget()
         container.setLayout(self.layout)
         self.setCentralWidget(container)
@@ -341,7 +343,6 @@ class MainWindow(QMainWindow):
         self.table_widget.setHorizontalHeaderLabels(headers)
         for row_idx, row_data in enumerate(data):
             for col_idx, value in enumerate(row_data):
-                print(row_idx, col_idx, value)
                 self.table_widget.setItem(row_idx, col_idx, QTableWidgetItem(str(value)))
 
     # def show_users(self):
