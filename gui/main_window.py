@@ -94,20 +94,18 @@ class MainWindow(QMainWindow):
         self.add_btn.clicked.connect(self.replace_add_button)
         self.layout.addWidget(self.add_btn)
 
+        self.clear_tables_btn = QPushButton("Очистить таблицы")
+        self.clear_tables_btn.clicked.connect(self.replace_clear_table_button)
+        self.layout.addWidget(self.clear_tables_btn)
+
         # Работа с таблицами
         self.load_data_btn = QPushButton("Вывести содержимое таблиц")
         self.load_data_btn.clicked.connect(self.load_data)
         self.layout.addWidget(self.load_data_btn)
 
-        self.clear_tables_btn = QPushButton("Очистить таблицы")
-        self.clear_tables_btn.clicked.connect(self.replace_clear_table_button)
-        self.layout.addWidget(self.clear_tables_btn)
-
         # self.show_users_btn = QPushButton("Вывести пользователей")
         # self.show_users_btn.clicked.connect(self.show_users)
         # self.layout.addWidget(self.show_users_btn)
-
-        self.layout.addWidget(self.table_widget)
 
         container = QWidget()
         container.setLayout(self.layout)
@@ -313,12 +311,25 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Успех", "Таблица бронирования очищена!")
 
     def load_data(self):
+        current_buttons = {
+            self.layout.itemAt(i).widget().text(): self.button_functions[self.layout.itemAt(i).widget().text()]
+            for i in range(self.layout.count())
+            if self.layout.itemAt(i).widget() != self.back_button}
+        self.button_stack.append(current_buttons)
+
+        self.add_btn.deleteLater()
+        self.clear_tables_btn.deleteLater()
+        self.load_data_btn.deleteLater()
+
+        self.layout.addWidget(self.table_widget)
         with next(get_db()) as db:
             try:
                 data = get_table_data(db, "users")  # Пример для таблицы "users"
                 self.display_table(data, ["id", "name", "phone", "role"])
             except Exception as e:
                 QMessageBox.critical(self, "Ошибка", str(e))
+
+        self.back_button.setEnabled(True)
 
     def display_table(self, data, headers):
         self.table_widget.setRowCount(len(data))
@@ -327,22 +338,6 @@ class MainWindow(QMainWindow):
         for row_idx, row_data in enumerate(data):
             for col_idx, value in enumerate(row_data):
                 print(row_idx, col_idx, value)
-                self.table_widget.setItem(row_idx, col_idx, QTableWidgetItem(str(value)))
-
-    def load_data(self):
-        with next(get_db()) as db:
-            try:
-                data = get_table_data(db, "users")  # Пример для таблицы "users"
-                self.display_table(data, ["id", "name", "phone", "role"])
-            except Exception as e:
-                QMessageBox.critical(self, "Ошибка", str(e))
-
-    def display_table(self, data, headers):
-        self.table_widget.setRowCount(len(data))
-        self.table_widget.setColumnCount(len(headers))
-        self.table_widget.setHorizontalHeaderLabels(headers)
-        for row_idx, row_data in enumerate(data):
-            for col_idx, value in enumerate(row_data):
                 self.table_widget.setItem(row_idx, col_idx, QTableWidgetItem(str(value)))
 
     # def show_users(self):
