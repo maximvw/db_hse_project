@@ -2,36 +2,68 @@ from datetime import date, datetime
 
 from PyQt6.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QWidget, QMessageBox, QDialog, QLineEdit, QLabel, \
     QDialogButtonBox
-
 from app.database import get_db
 from app.handlers import add_user, add_schedule, add_service, add_booking, clear_tables, clear_user, clear_service, \
     clear_booking, clear_schedule
 
 
 class InputDialog(QDialog):
-    def __init__(self):
+    def __init__(self, strings):
         super().__init__()
 
         self.setWindowTitle("Введите параметры")
-
+        self.setGeometry(100, 500, 500, 100)
         # Создаем элементы для ввода
         self.label = QLabel("Введите параметры:")
-        self.input_line = QLineEdit(self)
+        # self.labels = []
+        self.input_lines = []
+        for string in strings:
+            # self.labels.append(QLabel(''))
+            input_line = QLineEdit(self)
+            input_line.setPlaceholderText(string)
+            self.input_lines.append(input_line)
 
         # Кнопки OK и Cancel
         button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
-
+        
         # Устанавливаем self.layout
         self.layout = QVBoxLayout()
-        self.layout.addWidget(self.label)
-        self.layout.addWidget(self.input_line)
+        # for label in self.labels:
+        #     self.layout.addWidget(label)
+        for input_line in self.input_lines:
+            self.layout.addWidget(input_line)
+            self.setStyleSheet("""
+            QDialog {
+                background-color: #2e2e2e;
+            }
+
+            QLabel {
+                color: white;
+                font-size: 18px;
+                margin: 10px;
+            }
+
+            QPushButton {
+                background-color: #0078d7;
+                color: white;
+                border: none;
+                padding: 10px;
+                border-radius: 5px;
+            }
+
+            QPushButton:hover {
+                background-color: #0056a1;
+            }
+        """)
+
         self.layout.addWidget(button_box)
         self.setLayout(self.layout)
+        
 
     def get_input(self):
-        return self.input_line.text()
+        return [input_line.text() for input_line in self.input_lines]
 
 
 class MainWindow(QMainWindow):
@@ -60,6 +92,30 @@ class MainWindow(QMainWindow):
         container = QWidget()
         container.setLayout(self.layout)
         self.setCentralWidget(container)
+        
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: #2e2e2e;
+            }
+
+            QLabel {
+                color: white;
+                font-size: 18px;
+                margin: 10px;
+            }
+
+            QPushButton {
+                background-color: #0078d7;
+                color: white;
+                border: none;
+                padding: 10px;
+                border-radius: 5px;
+            }
+
+            QPushButton:hover {
+                background-color: #0056a1;
+            }
+        """)
 
         self.back_button = QPushButton("Назад")
         self.back_button.clicked.connect(self.go_back)
@@ -152,35 +208,35 @@ class MainWindow(QMainWindow):
                 self.back_button.setEnabled(False)
 
     def add_user(self):
-        dialog = InputDialog()
+        dialog = InputDialog(("Введите имя", "Введите телефон", "Введите роль"))
         if dialog.exec() == QDialog.DialogCode.Accepted:
             user_input = dialog.get_input()
             with next(get_db()) as db:
                 try:
-                    add_user(db, *user_input.split(' '))
+                    add_user(db, *user_input)
                     QMessageBox.information(self, "Успех", "Пользователь добавлен!")
                 except TypeError:
                     QMessageBox.information(self, "Неудача", "Неправильные аргументы")
 
     def add_service(self):
-        dialog = InputDialog()
+        dialog = InputDialog(("Введите название", "Введите цену за час"))
         if dialog.exec() == QDialog.DialogCode.Accepted:
             user_input = dialog.get_input()
             with next(get_db()) as db:
                 try:
-                    s_name, s_price = user_input.split(' ')[0], int(user_input.split(' ')[1])
+                    s_name, s_price = user_input[0], int(user_input[1])
                     add_service(db, s_name, s_price)
                     QMessageBox.information(self, "Успех", "Услуга добавлена!")
                 except TypeError:
                     QMessageBox.information(self, "Неудача", "Неправильные аргументы")
 
     def add_schedule(self):
-        dialog = InputDialog()
+        dialog = InputDialog(("Введите id тренера", "Введите id услуги", "Введите дату", "Введите время начала", "Введите время конца"))
         if dialog.exec() == QDialog.DialogCode.Accepted:
             user_input = dialog.get_input()
             with next(get_db()) as db:
                 try:
-                    parts = user_input.split()
+                    parts = user_input
                     trainer_id = int(parts[0])
                     service_id = int(parts[1])
                     date_str = parts[2].split(".")  # Преобразуем дату в формате "Y.M.D"
@@ -196,12 +252,12 @@ class MainWindow(QMainWindow):
                     QMessageBox.information(self, "Неудача", f"Неправильные аргументы {e}")
 
     def add_booking(self):
-        dialog = InputDialog()
+        dialog = InputDialog(("Введите id клиента", "Введите id расписания"))
         if dialog.exec() == QDialog.DialogCode.Accepted:
             user_input = dialog.get_input()
             with next(get_db()) as db:
                 try:
-                    client_id, schedule_id = map(int, user_input.split(' '))
+                    client_id, schedule_id = map(int, user_input)
                     add_booking(db, client_id, schedule_id)
                     QMessageBox.information(self, "Успех", "Бронирование добавлено!")
                 except TypeError:
