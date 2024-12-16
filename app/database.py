@@ -24,15 +24,3 @@ def get_db():
 
 if not database_exists(engine.url):
     create_database(engine.url)
-# with engine.connect() as connection:
-#     res = connection.execute(text("""
-#         SELECT 1 FROM pg_database WHERE datname='fitness_looking'
-#     """)).fetchone()
-#     if res is None:
-#         print("YES")
-#         connection.execute(text("""
-#             CREATE DATABASE fitness_booking;
-#         """))
-#         connection.commit()
-#     else:
-#         print(res)

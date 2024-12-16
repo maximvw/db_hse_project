@@ -3,8 +3,6 @@ from datetime import date, time
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.models import User
-
 
 def add_user(db: Session, name: str, phone: str, role: str):
     try:
@@ -80,10 +78,12 @@ def delete_by_field(db, table, field, value):
     db.execute(text(f"DELETE FROM {table} WHERE {field} = :value"), {"value": value})
     db.commit()
 
+
 def delete_row(db, table, values):
     del_clause = " AND ".join([f"{key} = :{key}" for key in values.keys()])
     db.execute(text(f"DELETE FROM {table} WHERE {del_clause}"), {**values})
     db.commit()
+
 
 def clear_tables(db: Session):
     try:
@@ -141,14 +141,3 @@ def clear_service(db: Session):
     except Exception as e:
         db.rollback()
         raise e
-
-# def show_users(db: Session):
-#     try:
-#         rows = db.execute(text("""
-#             SELECT * FROM users;
-#         """))
-#         db.commit()
-#         return rows
-#     except Exception as e:
-#         db.rollback()
-#         raise e

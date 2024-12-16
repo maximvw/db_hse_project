@@ -1,3 +1,5 @@
+import sys
+
 from PyQt6.QtWidgets import QApplication
 
 from app.procedures import create_procedures
@@ -6,8 +8,6 @@ from app.triggers import create_triggers
 from gui.main_window import MainWindow
 
 if __name__ == "__main__":
-    import sys
-
     # Инициализация базы данных
     create_tables()
     create_triggers()
