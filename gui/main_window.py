@@ -126,7 +126,7 @@ class MainWindow(QMainWindow):
             }),
             "Поиск услуги по названию": self.search_data,
             "Обновить запись": self.update_record,
-            "Удалить пользователя по имени": self.delete_by_field,
+            "Удалить услугу": self.delete_by_field,
             "Удалить запись": self.delete_row
         }
 
@@ -157,7 +157,7 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(self.update_btn)
 
         # Удаление данных
-        self.delete_by_field_btn = QPushButton("Удалить пользователя по имени")
+        self.delete_by_field_btn = QPushButton("Удалить услугу")
         self.delete_by_field_btn.clicked.connect(self.delete_by_field)
         self.layout.addWidget(self.delete_by_field_btn)
 
@@ -256,7 +256,7 @@ class MainWindow(QMainWindow):
                     self.search_btn = button
                 if button_text == "Обновить запись":
                     self.update_btn = button
-                if button_text == "Удалить пользователя по имени":
+                if button_text == "Удалить услугу":
                     self.delete_by_field_btn = button
                 if button_text == "Удалить запись":
                     self.delete_row_btn = button
@@ -394,12 +394,12 @@ class MainWindow(QMainWindow):
                     QMessageBox.critical(self, "Ошибка", str(e))
 
     def delete_by_field(self):
-        dialog = InputDialog(("Введите имя"))
+        dialog = InputDialog(("Введите название услуги"))
         if dialog.exec() == QDialog.DialogCode.Accepted:
             value = dialog.get_input()[0]
             with next(get_db()) as db:
                 try:
-                    delete_by_field(db, "users", "name", value)
+                    delete_by_field(db, "services", "service_name", value)
                     QMessageBox.information(self, "Успех", "Запись успешно удалена.")
                 except Exception as e:
                     QMessageBox.critical(self, "Ошибка", str(e))
