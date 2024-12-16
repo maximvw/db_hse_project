@@ -24,7 +24,7 @@ def create_tables():
 
             CREATE TABLE if not exists services(
                 id bigserial PRIMARY KEY,
-                service_name VARCHAR(255) NOT NULL UNIQUE,
+                service_name VARCHAR(255) NOT NULL,
                 price_per_hour INTEGER NOT NULL
             );
 

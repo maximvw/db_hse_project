@@ -63,10 +63,9 @@ def get_table_data(db: Session, table_name: str):
         return db.execute(text(f"SELECT (client_id, schedule_id, total_cost) FROM {table_name}")).fetchall(), \
                ["client_id", "schedule_id", "total_cost"]
 
-def search_by_field(db: Session, value: str, table: str = "users", field: str = "name"):
-    if table == "users":
-        return db.execute(text(f"SELECT (name, phone, role) FROM {table} WHERE {field} = :value"), {"value": value}).\
-            fetchall(), ["name", "phone", "role"]
+def search_by_field(db: Session, value: str, table: str = 'services', field: str = 'service_name'):
+    return db.execute(text(f"SELECT (service_name, price_per_hour) FROM {table} WHERE {field} = :value"), {"value": value}).\
+        fetchall(), ["service_name", "price_per_hour"]
 
 def update_row(db, table, row_id, updates):
     set_clause = ", ".join([f"{key} = :{key}" for key in updates.keys()])

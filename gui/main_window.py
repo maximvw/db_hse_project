@@ -40,6 +40,8 @@ class InputDialog(QDialog):
         self.label = QLabel("Введите параметры:")
         # self.labels = []
         self.input_lines = []
+        if isinstance(strings, str):
+            strings = [strings]
         for string in strings:
             # self.labels.append(QLabel(''))
             input_line = QLineEdit(self)
@@ -104,7 +106,7 @@ class MainWindow(QMainWindow):
 
         self.button_stack = []
         self.tables = []
-
+        self.current_buttons = []
         self.button_functions = {
             "Добавить": lambda x: self.ultimative_replace_button({"Добавить пользователя": self.add_user, "Добавить услугу": self.add_service, \
                 "Добавить расписание": self.add_schedule, "Добавить бронирование": self.add_booking}),
@@ -121,7 +123,7 @@ class MainWindow(QMainWindow):
                 "Вывести таблицу расписания": lambda x: self.load_data("schedule"),
                 "Вывести таблицу бронирования": lambda x: self.load_data("bookings")
                 }),
-            "Поиск по текстовому полю": self.search_data,
+            "Поиск услуги по названию": self.search_data,
             "Обновить запись": self.update_record,
             "Удалить по текстовому полю": self.delete_by_field
         }
@@ -142,7 +144,7 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(self.clear_tables_btn)
 
         # Поиск данных
-        self.search_btn = QPushButton("Поиск по текстовому полю")
+        self.search_btn = QPushButton("Поиск услуги по названию")
         self.search_btn.clicked.connect(self.search_data)
         self.layout.addWidget(self.search_btn)
 
@@ -246,7 +248,7 @@ class MainWindow(QMainWindow):
                 if button_text == "Вывести содержимое таблиц":
                     self.load_data_btn = button
                     self.table_widget = QTableWidget()
-                if button_text == "Поиск по текстовому полю":
+                if button_text == "Поиск услуги по названию":
                     self.search_btn = button
                 if button_text == "Обновить запись":
                     self.update_btn = button
@@ -361,13 +363,14 @@ class MainWindow(QMainWindow):
                 self.table_widget.setItem(row_idx, col_idx, QTableWidgetItem(value))
 
     def search_data(self):
-        dialog = InputDialog(("Введите имя",))
+        dialog = InputDialog(("Введите название услуги"))
         if dialog.exec() == QDialog.DialogCode.Accepted:
             user_input = dialog.get_input()[0]
             with next(get_db()) as db:
                 try:
-                    data, header = search_by_field(db, "users", "name", user_input)
-                    self.display_table(data, header)
+                    data, header = search_by_field(db, user_input)
+                    self.tables.append(TableWindow(data, header))
+                    self.tables[-1].show()
                 except Exception as e:
                     QMessageBox.critical(self, "Ошибка", str(e))
 
