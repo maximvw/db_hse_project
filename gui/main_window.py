@@ -41,9 +41,17 @@ class MainWindow(QMainWindow):
                 "Вывести таблицу бронирования": lambda x: self.load_data("bookings")
             }),
             "Поиск услуги по названию": self.search_data,
-            "Обновить запись": self.update_record,
+            "Обновить запись": lambda x: self.ultimative_replace_button({
+                "Обновить данные о пользователе": lambda x: self.update_record("users", ("Введите имя пользователя", "Введите телефон поьзователя", "Введите роль пользователя")),
+                "Обновить данные об услуге": lambda x: self.update_record("services", ("Введите имя услуги", "Введите цену в час")),
+                "Обновить данные о расписании": lambda x: self.update_record("schedule", ("Введите id тренера", "Введите id услуги", "Введите дату", "Введите время начала", "Введите время окончания")),
+                "Обновить данные о бронировании": lambda x: self.update_record("bookings", ("Введите id клиента", "Введите id расписания"))}),
             "Удалить услугу": self.delete_by_field,
-            "Удалить запись": self.delete_row
+            "Удалить запись": lambda x: self.ultimative_replace_button({
+                "Удалить пользователя(-ей)": lambda x: self.delete_row("users", ("Введите id пользователя", "Введите имя пользователя", "Введите телефон поьзователя", "Введите роль пользователя")),
+                "Удалить услугу(-и)": lambda x: self.delete_row("services", ("Введите id услуги", "Введите имя услуги", "Введите цену в час")),
+                "Удалить расписание(-я)": lambda x: self.delete_row("schedule", ("Введите id расписания", "Введите id тренера", "Введите id услуги", "Введите дату", "Введите время начала", "Введите время окончания")),
+                "Удалить бронирование(-я)": lambda x: self.delete_row("bookings", ("Введите id бронирования", "Введите id клиента", "Введите id расписания"))})
         }
 
         self.add_btn = QPushButton("Добавить")
@@ -69,7 +77,11 @@ class MainWindow(QMainWindow):
 
         # Обновление данных
         self.update_btn = QPushButton("Обновить запись")
-        self.update_btn.clicked.connect(self.update_record)
+        self.update_btn.clicked.connect(lambda x: self.ultimative_replace_button({
+                "Обновить данные о пользователе": lambda x: self.update_record("users", ("Введите имя пользователя", "Введите телефон поьзователя", "Введите роль пользователя")),
+                "Обновить данные об услуге": lambda x: self.update_record("services", ("Введите имя услуги", "Введите цену в час")),
+                "Обновить данные о расписании": lambda x: self.update_record("schedule", ("Введите id тренера", "Введите id услуги", "Введите дату", "Введите время начала", "Введите время окончания")),
+                "Обновить данные о бронировании": lambda x: self.update_record("bookings", ("Введите id клиента", "Введите id расписания"))}))
         self.layout.addWidget(self.update_btn)
 
         # Удаление данных
@@ -78,7 +90,11 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(self.delete_by_field_btn)
 
         self.delete_row_btn = QPushButton("Удалить запись")
-        self.delete_row_btn.clicked.connect(self.delete_row)
+        self.delete_row_btn.clicked.connect(lambda x: self.ultimative_replace_button({
+                "Удалить пользователя(-ей)": lambda x: self.delete_row("users", ("Введите id пользователя", "Введите имя пользователя", "Введите телефон поьзователя", "Введите роль пользователя")),
+                "Удалить услугу(-и)": lambda x: self.delete_row("services", ("Введите id услуги", "Введите имя услуги", "Введите цену в час")),
+                "Удалить расписание(-я)": lambda x: self.delete_row("schedule", ("Введите id расписания", "Введите id тренера", "Введите id услуги", "Введите дату", "Введите время начала", "Введите время окончания")),
+                "Удалить бронирование(-я)": lambda x: self.delete_row("bookings", ("Введите id бронирования", "Введите id клиента", "Введите id расписания"))}))
         self.layout.addWidget(self.delete_row_btn)
 
         # Работа с таблицами
@@ -185,6 +201,9 @@ class MainWindow(QMainWindow):
         dialog = InputDialog(("Введите имя", "Введите телефон", "Введите роль customer/trainer"))
         if dialog.exec() == QDialog.DialogCode.Accepted:
             user_input = dialog.get_input()
+            if any(len(input) == 0 for input in user_input):
+                QMessageBox.information(self, "Неудача", "Заполните все поля")
+                return
             with next(get_db()) as db:
                 try:
                     add_user(db, *user_input)
@@ -197,6 +216,9 @@ class MainWindow(QMainWindow):
         dialog = InputDialog(("Введите название", "Введите цену за час"))
         if dialog.exec() == QDialog.DialogCode.Accepted:
             user_input = dialog.get_input()
+            if any(len(input) == 0 for input in user_input):
+                QMessageBox.information(self, "Неудача", "Заполните все поля")
+                return
             with next(get_db()) as db:
                 try:
                     s_name, s_price = user_input[0], int(user_input[1])
@@ -210,6 +232,9 @@ class MainWindow(QMainWindow):
             ("Введите id тренера", "Введите id услуги", "Введите дату", "Введите время начала", "Введите время конца"))
         if dialog.exec() == QDialog.DialogCode.Accepted:
             user_input = dialog.get_input()
+            if any(len(input) == 0 for input in user_input):
+                QMessageBox.information(self, "Неудача", "Заполните все поля")
+                return
             with next(get_db()) as db:
                 try:
                     parts = user_input
@@ -231,6 +256,9 @@ class MainWindow(QMainWindow):
         dialog = InputDialog(("Введите id клиента", "Введите id расписания"))
         if dialog.exec() == QDialog.DialogCode.Accepted:
             user_input = dialog.get_input()
+            if any(len(input) == 0 for input in user_input):
+                QMessageBox.information(self, "Неудача", "Заполните все поля")
+                return
             with next(get_db()) as db:
                 try:
                     client_id, schedule_id = map(int, user_input)
@@ -273,15 +301,6 @@ class MainWindow(QMainWindow):
             except Exception as e:
                 QMessageBox.critical(self, "Ошибка", str(e))
 
-    def display_table(self, data, headers):
-        self.table_widget.setRowCount(len(data))
-        self.table_widget.setColumnCount(len(headers))
-        self.table_widget.setHorizontalHeaderLabels(headers)
-        for row_idx, row_data in enumerate(data):
-            row_data = [col for col in row_data[0][1:-1].split(',')]
-            for col_idx, value in enumerate(row_data):
-                self.table_widget.setItem(row_idx, col_idx, QTableWidgetItem(value))
-
     def search_data(self):
         dialog = InputDialog(("Введите название услуги"))
         if dialog.exec() == QDialog.DialogCode.Accepted:
@@ -294,20 +313,33 @@ class MainWindow(QMainWindow):
                 except Exception as e:
                     QMessageBox.critical(self, "Ошибка", str(e))
 
-    def update_record(self):
-        dialog = InputDialog(
-            ("Введите название таблицы", "Введите id",
-             "Что хотите поменять в формате столбец1:новое поле,столбец2:новое поле,и т.д."))
+    def update_record(self, table_name, strings):
+        dialog = InputDialog(("Введите id"))
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            table_name, id_row, updates = dialog.get_input()
-            id_row = int(id_row)
-            updates = {upd.split(":")[0]: upd.split(":")[1] for upd in updates.split(",")}
-            with next(get_db()) as db:
-                try:
-                    update_row(db, table_name, id_row, updates)  # Пример обновления
-                    QMessageBox.information(self, "Успех", "Запись успешно обновлена.")
-                except Exception as e:
-                    QMessageBox.critical(self, "Ошибка", str(e))
+            id_row = dialog.get_input()[0]
+            dialog = InputDialog(strings)
+            if dialog.exec() == QDialog.DialogCode.Accepted:
+                updates = dialog.get_input()
+                if all(len(input) == 0 for input in updates):
+                    QMessageBox.information(self, "Неудача", "Заполните хотя бы одно поле")
+                    return
+                id_row = int(id_row)
+                columns = ()
+                if table_name == 'users':
+                    columns = ('name', 'phone', 'role')
+                if table_name == 'services':
+                    columns = ('service_name', 'price_per_hour')
+                if table_name == 'schedule':
+                    columns = ('trainer_id', 'service_id', 'date_calendar', 'start_time', 'end_time')
+                if table_name == 'bookings':
+                    columns = ('client_id', 'schedule_id')
+                updates = {columns[i]: updates[i] for i in range(len(updates)) if len(updates[i]) > 0}
+                with next(get_db()) as db:
+                    try:
+                        update_row(db, table_name, id_row, updates)  # Пример обновления
+                        QMessageBox.information(self, "Успех", "Запись успешно обновлена.")
+                    except Exception as e:
+                        QMessageBox.critical(self, "Ошибка", str(e))
 
     def delete_by_field(self):
         dialog = InputDialog(("Введите название услуги"))
@@ -320,20 +352,26 @@ class MainWindow(QMainWindow):
                 except Exception as e:
                     QMessageBox.critical(self, "Ошибка", str(e))
 
-    def delete_row(self):
-        dialog = InputDialog(("Введите название таблицы",
-                              "Введите значения в формате столбец1:значение1,столбец2:значение2,и т.д.",))
+    def delete_row(self, table_name, strings):
+        dialog = InputDialog(strings)
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            table_name, values = dialog.get_input()
-            values = {upd.split(":")[0]: upd.split(":")[1] for upd in values.split(",")}
+            values = dialog.get_input()
+            if all(len(input) == 0 for input in values):
+                QMessageBox.information(self, "Неудача", "Заполните хотя бы одно поле")
+                return
+            columns = ()
+            if table_name == 'users':
+                columns = ('id', 'name', 'phone', 'role')
+            if table_name == 'services':
+                columns = ('id', 'service_name', 'price_per_hour')
+            if table_name == 'schedule':
+                columns = ('id', 'trainer_id', 'service_id', 'date_calendar', 'start_time', 'end_time')
+            if table_name == 'bookings':
+                columns = ('id', 'client_id', 'schedule_id')
+            values = {columns[i]: values[i] for i in range(len(values)) if len(values[i]) > 0}
             with next(get_db()) as db:
                 try:
                     delete_row(db, table_name, values)
                     QMessageBox.information(self, "Успех", "Запись успешно удалена.")
                 except Exception as e:
                     QMessageBox.critical(self, "Ошибка", str(e))
-
-    # def show_users(self):
-    #     with next(get_db()) as db:
-    #         for row in show_users(db):
-    #             QMessageBox.information(self, "Успех", str(row))

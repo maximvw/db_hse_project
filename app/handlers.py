@@ -43,10 +43,6 @@ def add_booking(db: Session, client_id: int, schedule_id: int, total_cost: float
         raise e
 
 
-def get_users(db: Session):
-    return db.query(User).all()
-
-
 def get_table_data(db: Session, table_name: str):
     if table_name == "users":
         return db.execute(text(f"SELECT * FROM {table_name} ORDER BY id ASC")).fetchall(), \
@@ -69,21 +65,32 @@ def search_by_field(db: Session, value: str, table: str = 'services', field: str
 
 
 def update_row(db, table, row_id, updates):
-    set_clause = ", ".join([f"{key} = :{key}" for key in updates.keys()])
-    db.execute(text(f"UPDATE {table} SET {set_clause} WHERE id = :id"), {"id": row_id, **updates})
-    db.commit()
+    try:
+        set_clause = ", ".join([f"{key} = :{key}" for key in updates.keys()])
+        db.execute(text(f"UPDATE {table} SET {set_clause} WHERE id = :id"), {"id": row_id, **updates})
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise e
 
 
 def delete_by_field(db, table, field, value):
-    db.execute(text(f"DELETE FROM {table} WHERE {field} = :value"), {"value": value})
-    db.commit()
+    try:
+        db.execute(text(f"DELETE FROM {table} WHERE {field} = :value"), {"value": value})
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise e
 
 
 def delete_row(db, table, values):
-    del_clause = " AND ".join([f"{key} = :{key}" for key in values.keys()])
-    db.execute(text(f"DELETE FROM {table} WHERE {del_clause}"), {**values})
-    db.commit()
-
+    try:
+        del_clause = " AND ".join([f"{key} = :{key}" for key in values.keys()])
+        db.execute(text(f"DELETE FROM {table} WHERE {del_clause}"), {**values})
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise e
 
 def clear_tables(db: Session):
     try:
