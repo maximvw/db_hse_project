@@ -5,12 +5,12 @@ from app.database import get_db
 
 def create_tables():
     with next(get_db()) as db:
-        db.execute(text("""
-            DROP TABLE users CASCADE;
-            DROP TABLE services CASCADE;
-            DROP TABLE schedule CASCADE;
-            DROP TABLE bookings CASCADE;
-        """))
+        # db.execute(text("""
+        #     DROP TABLE users CASCADE;
+        #     DROP TABLE services CASCADE;
+        #     DROP TABLE schedule CASCADE;
+        #     DROP TABLE bookings CASCADE;
+        # """))
 
 
         db.execute(text("""
