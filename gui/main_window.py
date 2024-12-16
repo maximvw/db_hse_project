@@ -348,7 +348,7 @@ class MainWindow(QMainWindow):
                 data, header = get_table_data(db, table_name)
                 self.tables.append(TableWindow(data, header))
                 self.tables[-1].show()
-                # table_winow.display_table(data, header)
+                # self.display_table(data, header)
             except Exception as e:
                 QMessageBox.critical(self, "Ошибка", str(e))
 
@@ -377,7 +377,7 @@ class MainWindow(QMainWindow):
     def update_record(self):
         with next(get_db()) as db:
             try:
-                update_row(db, "users", 1, {"name": "Пётр Петров"})  # Пример обновления
+                update_row(db, "users", 1, {"name": "petr"})  # Пример обновления
                 QMessageBox.information(self, "Успех", "Запись успешно обновлена.")
             except Exception as e:
                 QMessageBox.critical(self, "Ошибка", str(e))

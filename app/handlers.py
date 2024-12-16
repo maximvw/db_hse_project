@@ -70,10 +70,11 @@ def search_by_field(db: Session, value: str, table: str = 'services', field: str
 def update_row(db, table, row_id, updates):
     set_clause = ", ".join([f"{key} = :{key}" for key in updates.keys()])
     db.execute(text(f"UPDATE {table} SET {set_clause} WHERE id = :id"), {"id": row_id, **updates})
+    db.commit()
 
 def delete_by_field(db, table, field, value):
     db.execute(text(f"DELETE FROM {table} WHERE {field} = :value"), {"value": value})
-
+    db.commit()
 
 def clear_tables(db: Session):
     try:
