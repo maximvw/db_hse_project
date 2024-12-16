@@ -10,6 +10,25 @@ from app.database import get_db
 from app.handlers import add_user, add_schedule, add_service, add_booking, clear_tables, clear_user, clear_service, \
     clear_booking, clear_schedule, get_table_data, search_by_field, update_row, delete_by_field
 
+class TableWindow(QMainWindow):
+    def __init__(self, data, headers):
+        super().__init__()
+        self.setWindowTitle("Таблица данных")
+        self.setGeometry(100, 100, 800, 600)  # Установка начального размера окна
+
+        self.table_widget = QTableWidget()
+        self.setCentralWidget(self.table_widget)
+        self.display_table(data, headers)
+
+    def display_table(self, data, headers):
+        self.table_widget.setRowCount(len(data))
+        self.table_widget.setColumnCount(len(headers))
+        self.table_widget.setHorizontalHeaderLabels(headers)
+        for row_idx, row_data in enumerate(data):
+            row_data = [col for col in row_data[0][1:-1].split(',')]
+            for col_idx, value in enumerate(row_data):
+                self.table_widget.setItem(row_idx, col_idx, QTableWidgetItem(value))
+    
 
 class InputDialog(QDialog):
     def __init__(self, strings):
@@ -79,11 +98,12 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Fitness Booking")
         self.setGeometry(100, 100, 800, 600)
 
-        self.table_widget = QTableWidget()
+        #self.table_widget = QTableWidget()
         self.search_field = QLineEdit()
         self.layout = QVBoxLayout()
 
         self.button_stack = []
+        self.tables = []
 
         self.button_functions = {
             "Добавить": self.replace_add_button,
@@ -379,11 +399,12 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Успех", "Таблица бронирования очищена!")
 
     def load_data(self, table_name):
-        self.layout.addWidget(self.table_widget)
         with next(get_db()) as db:
             try:
                 data, header = get_table_data(db, table_name)
-                self.display_table(data, header)
+                self.tables.append(TableWindow(data, header))
+                self.tables[-1].show()
+                # table_winow.display_table(data, header)
             except Exception as e:
                 QMessageBox.critical(self, "Ошибка", str(e))
 
