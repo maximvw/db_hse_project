@@ -80,6 +80,10 @@ def delete_by_field(db, table, field, value):
     db.execute(text(f"DELETE FROM {table} WHERE {field} = :value"), {"value": value})
     db.commit()
 
+def delete_row(db, table, values):
+    del_clause = " AND ".join([f"{key} = :{key}" for key in values.keys()])
+    db.execute(text(f"DELETE FROM {table} WHERE {del_clause}"), {**values})
+    db.commit()
 
 def clear_tables(db: Session):
     try:

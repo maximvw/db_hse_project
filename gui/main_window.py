@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
 
 from app.database import get_db
 from app.handlers import add_user, add_schedule, add_service, add_booking, clear_tables, clear_user, clear_service, \
-    clear_booking, clear_schedule, get_table_data, search_by_field, update_row, delete_by_field
+    clear_booking, clear_schedule, get_table_data, search_by_field, update_row, delete_by_field, delete_row
 
 
 class TableWindow(QMainWindow):
@@ -126,7 +126,8 @@ class MainWindow(QMainWindow):
             }),
             "Поиск услуги по названию": self.search_data,
             "Обновить запись": self.update_record,
-            "Удалить пользователя по имени": self.delete_by_field
+            "Удалить пользователя по имени": self.delete_by_field,
+            "Удалить запись": self.delete_row
         }
 
         self.add_btn = QPushButton("Добавить")
@@ -159,6 +160,10 @@ class MainWindow(QMainWindow):
         self.delete_by_field_btn = QPushButton("Удалить пользователя по имени")
         self.delete_by_field_btn.clicked.connect(self.delete_by_field)
         self.layout.addWidget(self.delete_by_field_btn)
+
+        self.delete_row_btn = QPushButton("Удалить запись")
+        self.delete_row_btn.clicked.connect(self.delete_row)
+        self.layout.addWidget(self.delete_row_btn)
 
         # Работа с таблицами
         self.load_data_btn = QPushButton("Вывести содержимое таблиц")
@@ -217,6 +222,7 @@ class MainWindow(QMainWindow):
         self.search_btn.deleteLater()
         self.update_btn.deleteLater()
         self.delete_by_field_btn.deleteLater()
+        self.delete_row_btn.deleteLater()
 
         for button_name in buttons:
             current_btn = QPushButton(button_name)
@@ -252,6 +258,8 @@ class MainWindow(QMainWindow):
                     self.update_btn = button
                 if button_text == "Удалить пользователя по имени":
                     self.delete_by_field_btn = button
+                if button_text == "Удалить запись":
+                    self.delete_row_btn = button
 
             # Если стек пуст, отключаем кнопку "Назад", иначе оставляем включенной
             if not self.button_stack:
@@ -392,6 +400,19 @@ class MainWindow(QMainWindow):
             with next(get_db()) as db:
                 try:
                     delete_by_field(db, "users", "name", value)
+                    QMessageBox.information(self, "Успех", "Запись успешно удалена.")
+                except Exception as e:
+                    QMessageBox.critical(self, "Ошибка", str(e))
+
+    def delete_row(self):
+        dialog = InputDialog(("Введите название таблицы",
+                              "Введите значения в формате столбец1:значение1,столбец2:значение2,и т.д.",))
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            table_name, values = dialog.get_input()
+            values = {upd.split(":")[0]: upd.split(":")[1] for upd in values.split(",")}
+            with next(get_db()) as db:
+                try:
+                    delete_row(db, table_name, values)
                     QMessageBox.information(self, "Успех", "Запись успешно удалена.")
                 except Exception as e:
                     QMessageBox.critical(self, "Ошибка", str(e))
