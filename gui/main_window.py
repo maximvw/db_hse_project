@@ -106,20 +106,39 @@ class MainWindow(QMainWindow):
         self.tables = []
 
         self.button_functions = {
-            "Добавить": self.replace_add_button,
-            "Очистить таблицы": self.replace_clear_table_button,
-            "Вывести содержимое таблиц": self.replace_load_data_button,
+            "Добавить": lambda x: self.ultimative_replace_button({"Добавить пользователя": self.add_user, "Добавить услугу": self.add_service, \
+                "Добавить расписание": self.add_schedule, "Добавить бронирование": self.add_booking}),
+            "Очистить таблицы": lambda x: self.ultimative_replace_button({
+                "Очистить все таблицы": self.clear_tables,
+                "Очистить таблицу пользователей": self.clear_user,
+                "Очистить таблицу услуг": self.clear_service,
+                "Очистить таблицу расписания": self.clear_schedule,
+                "Очистить таблицу бронирования": self.clear_booking
+                }),
+            "Вывести содержимое таблиц": lambda x: self.ultimative_replace_button({
+                "Вывести таблицу пользователей": lambda x: self.load_data("users"),
+                "Вывести таблицу услуг": lambda x: self.load_data("services"),
+                "Вывести таблицу расписания": lambda x: self.load_data("schedule"),
+                "Вывести таблицу бронирования": lambda x: self.load_data("bookings")
+                }),
             "Поиск по текстовому полю": self.search_data,
             "Обновить запись": self.update_record,
             "Удалить по текстовому полю": self.delete_by_field
         }
 
         self.add_btn = QPushButton("Добавить")
-        self.add_btn.clicked.connect(self.replace_add_button)
+        self.add_btn.clicked.connect(lambda x: self.ultimative_replace_button({"Добавить пользователя": self.add_user, "Добавить услугу": self.add_service, \
+                "Добавить расписание": self.add_schedule, "Добавить бронирование": self.add_booking}))
         self.layout.addWidget(self.add_btn)
 
         self.clear_tables_btn = QPushButton("Очистить таблицы")
-        self.clear_tables_btn.clicked.connect(self.replace_clear_table_button)
+        self.clear_tables_btn.clicked.connect(lambda x: self.ultimative_replace_button({
+            "Очистить все таблицы": self.clear_tables,
+            "Очистить таблицу пользователей": self.clear_user,
+            "Очистить таблицу услуг": self.clear_service,
+            "Очистить таблицу расписания": self.clear_schedule,
+            "Очистить таблицу бронирования": self.clear_booking
+            }))
         self.layout.addWidget(self.clear_tables_btn)
 
         # Поиск данных
@@ -139,7 +158,12 @@ class MainWindow(QMainWindow):
 
         # Работа с таблицами
         self.load_data_btn = QPushButton("Вывести содержимое таблиц")
-        self.load_data_btn.clicked.connect(self.replace_load_data_button)
+        self.load_data_btn.clicked.connect(lambda x: self.ultimative_replace_button({
+                "Вывести таблицу пользователей": lambda x: self.load_data("users"),
+                "Вывести таблицу услуг": lambda x: self.load_data("services"),
+                "Вывести таблицу расписания": lambda x: self.load_data("schedule"),
+                "Вывести таблицу бронирования": lambda x: self.load_data("bookings")
+                }))
         self.layout.addWidget(self.load_data_btn)
 
         # self.show_users_btn = QPushButton("Вывести пользователей")
@@ -180,7 +204,7 @@ class MainWindow(QMainWindow):
         # Добавляем кнопку "Назад" в layout
         self.layout.addWidget(self.back_button)
 
-    def replace_add_button(self):
+    def ultimative_replace_button(self, buttons):
         current_buttons = {
             self.layout.itemAt(i).widget().text(): self.button_functions[self.layout.itemAt(i).widget().text()]
             for i in range(self.layout.count())
@@ -193,96 +217,14 @@ class MainWindow(QMainWindow):
         self.search_btn.deleteLater()
         self.update_btn.deleteLater()
         self.delete_by_field_btn.deleteLater()
-
-        self.add_user_btn = QPushButton("Добавить пользователя")
-        self.add_user_btn.clicked.connect(self.add_user)
-        self.layout.addWidget(self.add_user_btn)
-
-        self.add_service_btn = QPushButton("Добавить услугу")
-        self.add_service_btn.clicked.connect(self.add_service)
-        self.layout.addWidget(self.add_service_btn)
-
-        self.add_schedule_btn = QPushButton("Добавить расписание")
-        self.add_schedule_btn.clicked.connect(self.add_schedule)
-        self.layout.addWidget(self.add_schedule_btn)
-
-        self.add_booking_btn = QPushButton("Добавить бронирование")
-        self.add_booking_btn.clicked.connect(self.add_booking)
-        self.layout.addWidget(self.add_booking_btn)
-
-        self.back_button.setEnabled(True)
-
-    def replace_clear_table_button(self):
-        current_buttons = {
-            self.layout.itemAt(i).widget().text(): self.button_functions[self.layout.itemAt(i).widget().text()]
-            for i in range(self.layout.count())
-            if self.layout.itemAt(i).widget() != self.back_button}
-        self.button_stack.append(current_buttons)
-
-        self.add_btn.deleteLater()
-        self.clear_tables_btn.deleteLater()
-        self.load_data_btn.deleteLater()
-        self.search_btn.deleteLater()
-        self.update_btn.deleteLater()
-        self.delete_by_field_btn.deleteLater()
-
-
-        self.clear_all_btn = QPushButton("Очистить все таблицы")
-        self.clear_all_btn.clicked.connect(self.clear_tables)
-        self.layout.addWidget(self.clear_all_btn)
-
-        self.clear_user_btn = QPushButton("Очистить таблицу пользователей")
-        self.clear_user_btn.clicked.connect(self.clear_user)
-        self.layout.addWidget(self.clear_user_btn)
-
-        self.clear_service_btn = QPushButton("Очистить таблицу услуг")
-        self.clear_service_btn.clicked.connect(self.clear_service)
-        self.layout.addWidget(self.clear_service_btn)
-
-        self.clear_schedule_btn = QPushButton("Очистить таблицу расписания")
-        self.clear_schedule_btn.clicked.connect(self.clear_schedule)
-        self.layout.addWidget(self.clear_schedule_btn)
-
-        self.clear_booking_btn = QPushButton("Очистить таблицу бронирования")
-        self.clear_booking_btn.clicked.connect(self.clear_booking)
-        self.layout.addWidget(self.clear_booking_btn)
+        
+        for button_name in buttons:
+            current_btn = QPushButton(button_name)
+            current_btn.clicked.connect(buttons[button_name])
+            self.layout.addWidget(current_btn)
 
         self.back_button.setEnabled(True)
         
-    def replace_load_data_button(self):
-        current_buttons = {
-            self.layout.itemAt(i).widget().text(): self.button_functions[self.layout.itemAt(i).widget().text()]
-            for i in range(self.layout.count())
-            if self.layout.itemAt(i).widget() != self.back_button}
-        self.button_stack.append(current_buttons)
-
-        self.add_btn.deleteLater()
-        self.clear_tables_btn.deleteLater()
-        self.load_data_btn.deleteLater()
-        self.search_btn.deleteLater()
-        self.update_btn.deleteLater()
-        self.delete_by_field_btn.deleteLater()
-
-
-        self.load_users_btn = QPushButton("Вывести таблицу пользователей")
-        self.load_users_btn.clicked.connect(lambda x: self.load_data("users"))
-        self.layout.addWidget(self.load_users_btn)
-
-        self.load_services_btn = QPushButton("Вывести таблицу услуг")
-        self.load_services_btn.clicked.connect(lambda x: self.load_data("services"))
-        self.layout.addWidget(self.load_services_btn)
-
-        self.load_schedule_btn = QPushButton("Вывести таблицу расписания")
-        self.load_schedule_btn.clicked.connect(lambda x: self.load_data("schedule"))
-        self.layout.addWidget(self.load_schedule_btn)
-
-        self.load_booking_btn = QPushButton("Вывести таблицу бронирования")
-        self.load_booking_btn.clicked.connect(lambda x: self.load_data("bookings"))
-        self.layout.addWidget(self.load_booking_btn)
-
-        self.back_button.setEnabled(True)
-        
-
     def go_back(self):
         if self.button_stack:
             # Удаляем текущие кнопки (кроме кнопки "Назад")
