@@ -51,17 +51,18 @@ def get_users(db: Session):
 
 def get_table_data(db: Session, table_name: str):
     if table_name == "users":
-        return db.execute(text(f"SELECT (name, phone, role) FROM {table_name}")).fetchall(), ["name", "phone", "role"]
+        return db.execute(text(f"SELECT * FROM {table_name} ORDER BY id ASC")).fetchall(),\
+               ["id", "name", "phone", "role"]
     if table_name == "services":
-        return db.execute(text(f"SELECT (service_name, price_per_hour) FROM {table_name}")).fetchall(), \
-               ["service_name", "price_per_hour"]
+        return db.execute(text(f"SELECT * FROM {table_name} ORDER BY id ASC")).fetchall(), \
+               ["id", "service_name", "price_per_hour"]
     if table_name == "schedule":
         return \
-            db.execute(text(f"SELECT (trainer_id, service_id, date_calendar, start_time, end_time) FROM {table_name}")) \
-                .fetchall(), ["trainer_id", "service_id", "date_calendar", "start_time", "end_time"]
+            db.execute(text(f"SELECT * FROM {table_name} ORDER BY id ASC")) \
+                .fetchall(), ["id", "trainer_id", "service_id", "date_calendar", "start_time", "end_time"]
     if table_name == "bookings":
-        return db.execute(text(f"SELECT (client_id, schedule_id, total_cost) FROM {table_name}")).fetchall(), \
-               ["client_id", "schedule_id", "total_cost"]
+        return db.execute(text(f"SELECT * FROM {table_name} ORDER BY id ASC")).fetchall(), \
+               ["id", "client_id", "schedule_id", "total_cost"]
 
 def search_by_field(db: Session, value: str, table: str = 'services', field: str = 'service_name'):
     return db.execute(text(f"SELECT (service_name, price_per_hour) FROM {table} WHERE {field} = :value"), {"value": value}).\

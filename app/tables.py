@@ -19,6 +19,7 @@ def create_tables():
                 name VARCHAR(255) NOT NULL,
                 phone VARCHAR(15) NOT NULL,
                 role VARCHAR(15) NOT NULL
+                        CONSTRAINT ch_role CHECK (role IN ('customer', 'trainer'))
             );
 
 

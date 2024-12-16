@@ -1,16 +1,14 @@
 from PyQt6.QtWidgets import QApplication
-from gui.main_window import MainWindow
-# from app.database import engine
-# from app.models import Base
+
+from app.procedures import create_procedures
 from app.tables import create_tables
 from app.triggers import create_triggers
-from app.procedures import create_procedures
+from gui.main_window import MainWindow
 
 if __name__ == "__main__":
     import sys
 
     # Инициализация базы данных
-    # Base.metadata.create_all(bind=engine)
     create_tables()
     create_triggers()
     create_procedures()
@@ -20,8 +18,3 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
-
-# 1 1 10.2.2014 12:00 13:00
-# ivan 229 slabiy
-# stas 1312 boss
-# jim 100

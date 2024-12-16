@@ -10,6 +10,7 @@ from app.database import get_db
 from app.handlers import add_user, add_schedule, add_service, add_booking, clear_tables, clear_user, clear_service, \
     clear_booking, clear_schedule, get_table_data, search_by_field, update_row, delete_by_field
 
+
 class TableWindow(QMainWindow):
     def __init__(self, data, headers):
         super().__init__()
@@ -25,10 +26,10 @@ class TableWindow(QMainWindow):
         self.table_widget.setColumnCount(len(headers))
         self.table_widget.setHorizontalHeaderLabels(headers)
         for row_idx, row_data in enumerate(data):
-            row_data = [col for col in row_data[0][1:-1].split(',')]
+            # row_data = [col for col in row_data[0][1:-1].split(',')]
             for col_idx, value in enumerate(row_data):
-                self.table_widget.setItem(row_idx, col_idx, QTableWidgetItem(value))
-    
+                self.table_widget.setItem(row_idx, col_idx, QTableWidgetItem(str(value)))
+
 
 class InputDialog(QDialog):
     def __init__(self, strings):
@@ -100,7 +101,6 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Fitness Booking")
         self.setGeometry(100, 100, 800, 600)
 
-        #self.table_widget = QTableWidget()
         self.search_field = QLineEdit()
         self.layout = QVBoxLayout()
 
@@ -108,29 +108,31 @@ class MainWindow(QMainWindow):
         self.tables = []
         self.current_buttons = []
         self.button_functions = {
-            "Добавить": lambda x: self.ultimative_replace_button({"Добавить пользователя": self.add_user, "Добавить услугу": self.add_service, \
-                "Добавить расписание": self.add_schedule, "Добавить бронирование": self.add_booking}),
+            "Добавить": lambda x: self.ultimative_replace_button(
+                {"Добавить пользователя": self.add_user, "Добавить услугу": self.add_service, \
+                 "Добавить расписание": self.add_schedule, "Добавить бронирование": self.add_booking}),
             "Очистить таблицы": lambda x: self.ultimative_replace_button({
                 "Очистить все таблицы": self.clear_tables,
                 "Очистить таблицу пользователей": self.clear_user,
                 "Очистить таблицу услуг": self.clear_service,
                 "Очистить таблицу расписания": self.clear_schedule,
                 "Очистить таблицу бронирования": self.clear_booking
-                }),
+            }),
             "Вывести содержимое таблиц": lambda x: self.ultimative_replace_button({
                 "Вывести таблицу пользователей": lambda x: self.load_data("users"),
                 "Вывести таблицу услуг": lambda x: self.load_data("services"),
                 "Вывести таблицу расписания": lambda x: self.load_data("schedule"),
                 "Вывести таблицу бронирования": lambda x: self.load_data("bookings")
-                }),
+            }),
             "Поиск услуги по названию": self.search_data,
             "Обновить запись": self.update_record,
-            "Удалить по текстовому полю": self.delete_by_field
+            "Удалить пользователя по имени": self.delete_by_field
         }
 
         self.add_btn = QPushButton("Добавить")
-        self.add_btn.clicked.connect(lambda x: self.ultimative_replace_button({"Добавить пользователя": self.add_user, "Добавить услугу": self.add_service, \
-                "Добавить расписание": self.add_schedule, "Добавить бронирование": self.add_booking}))
+        self.add_btn.clicked.connect(lambda x: self.ultimative_replace_button(
+            {"Добавить пользователя": self.add_user, "Добавить услугу": self.add_service, \
+             "Добавить расписание": self.add_schedule, "Добавить бронирование": self.add_booking}))
         self.layout.addWidget(self.add_btn)
 
         self.clear_tables_btn = QPushButton("Очистить таблицы")
@@ -140,7 +142,7 @@ class MainWindow(QMainWindow):
             "Очистить таблицу услуг": self.clear_service,
             "Очистить таблицу расписания": self.clear_schedule,
             "Очистить таблицу бронирования": self.clear_booking
-            }))
+        }))
         self.layout.addWidget(self.clear_tables_btn)
 
         # Поиск данных
@@ -154,23 +156,19 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(self.update_btn)
 
         # Удаление данных
-        self.delete_by_field_btn = QPushButton("Удалить по текстовому полю")
+        self.delete_by_field_btn = QPushButton("Удалить пользователя по имени")
         self.delete_by_field_btn.clicked.connect(self.delete_by_field)
         self.layout.addWidget(self.delete_by_field_btn)
 
         # Работа с таблицами
         self.load_data_btn = QPushButton("Вывести содержимое таблиц")
         self.load_data_btn.clicked.connect(lambda x: self.ultimative_replace_button({
-                "Вывести таблицу пользователей": lambda x: self.load_data("users"),
-                "Вывести таблицу услуг": lambda x: self.load_data("services"),
-                "Вывести таблицу расписания": lambda x: self.load_data("schedule"),
-                "Вывести таблицу бронирования": lambda x: self.load_data("bookings")
-                }))
+            "Вывести таблицу пользователей": lambda x: self.load_data("users"),
+            "Вывести таблицу услуг": lambda x: self.load_data("services"),
+            "Вывести таблицу расписания": lambda x: self.load_data("schedule"),
+            "Вывести таблицу бронирования": lambda x: self.load_data("bookings")
+        }))
         self.layout.addWidget(self.load_data_btn)
-
-        # self.show_users_btn = QPushButton("Вывести пользователей")
-        # self.show_users_btn.clicked.connect(self.show_users)
-        # self.layout.addWidget(self.show_users_btn)
 
         container = QWidget()
         container.setLayout(self.layout)
@@ -219,14 +217,14 @@ class MainWindow(QMainWindow):
         self.search_btn.deleteLater()
         self.update_btn.deleteLater()
         self.delete_by_field_btn.deleteLater()
-        
+
         for button_name in buttons:
             current_btn = QPushButton(button_name)
             current_btn.clicked.connect(buttons[button_name])
             self.layout.addWidget(current_btn)
 
         self.back_button.setEnabled(True)
-        
+
     def go_back(self):
         if self.button_stack:
             # Удаляем текущие кнопки (кроме кнопки "Назад")
@@ -252,24 +250,24 @@ class MainWindow(QMainWindow):
                     self.search_btn = button
                 if button_text == "Обновить запись":
                     self.update_btn = button
-                if button_text == "Удалить по текстовому полю":
+                if button_text == "Удалить пользователя по имени":
                     self.delete_by_field_btn = button
-                
 
             # Если стек пуст, отключаем кнопку "Назад", иначе оставляем включенной
             if not self.button_stack:
                 self.back_button.setEnabled(False)
 
     def add_user(self):
-        dialog = InputDialog(("Введите имя", "Введите телефон", "Введите роль"))
+        dialog = InputDialog(("Введите имя", "Введите телефон", "Введите роль customer/trainer"))
         if dialog.exec() == QDialog.DialogCode.Accepted:
             user_input = dialog.get_input()
             with next(get_db()) as db:
                 try:
                     add_user(db, *user_input)
                     QMessageBox.information(self, "Успех", "Пользователь добавлен!")
-                except TypeError:
-                    QMessageBox.information(self, "Неудача", "Неправильные аргументы")
+                except Exception as e:
+                    QMessageBox.information(self, "Неудача",
+                                            "Неправильные аргументы {}".format(e.args[0].split("\n")[0]))
 
     def add_service(self):
         dialog = InputDialog(("Введите название", "Введите цену за час"))
@@ -280,8 +278,8 @@ class MainWindow(QMainWindow):
                     s_name, s_price = user_input[0], int(user_input[1])
                     add_service(db, s_name, s_price)
                     QMessageBox.information(self, "Успех", "Услуга добавлена!")
-                except TypeError:
-                    QMessageBox.information(self, "Неудача", "Неправильные аргументы")
+                except Exception as e:
+                    QMessageBox.information(self, "Неудача", f"Неправильные аргументы {e}")
 
     def add_schedule(self):
         dialog = InputDialog(
@@ -348,10 +346,8 @@ class MainWindow(QMainWindow):
                 data, header = get_table_data(db, table_name)
                 self.tables.append(TableWindow(data, header))
                 self.tables[-1].show()
-                # self.display_table(data, header)
             except Exception as e:
                 QMessageBox.critical(self, "Ошибка", str(e))
-
 
     def display_table(self, data, headers):
         self.table_widget.setRowCount(len(data))
@@ -375,20 +371,30 @@ class MainWindow(QMainWindow):
                     QMessageBox.critical(self, "Ошибка", str(e))
 
     def update_record(self):
-        with next(get_db()) as db:
-            try:
-                update_row(db, "users", 1, {"name": "petr"})  # Пример обновления
-                QMessageBox.information(self, "Успех", "Запись успешно обновлена.")
-            except Exception as e:
-                QMessageBox.critical(self, "Ошибка", str(e))
+        dialog = InputDialog(
+            ("Введите название таблицы", "Введите id",
+             "Что хотите поменять в формате столбец1:новое поле,столбец2:новое поле,и т.д."))
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            table_name, id_row, updates = dialog.get_input()
+            id_row = int(id_row)
+            updates = {upd.split(":")[0]: upd.split(":")[1] for upd in updates.split(",")}
+            with next(get_db()) as db:
+                try:
+                    update_row(db, table_name, id_row, updates)  # Пример обновления
+                    QMessageBox.information(self, "Успех", "Запись успешно обновлена.")
+                except Exception as e:
+                    QMessageBox.critical(self, "Ошибка", str(e))
 
     def delete_by_field(self):
-        with next(get_db()) as db:
-            try:
-                delete_by_field(db, "users", "name", "Иван Иванов")
-                QMessageBox.information(self, "Успех", "Запись успешно удалена.")
-            except Exception as e:
-                QMessageBox.critical(self, "Ошибка", str(e))
+        dialog = InputDialog(("Введите имя"))
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            value = dialog.get_input()[0]
+            with next(get_db()) as db:
+                try:
+                    delete_by_field(db, "users", "name", value)
+                    QMessageBox.information(self, "Успех", "Запись успешно удалена.")
+                except Exception as e:
+                    QMessageBox.critical(self, "Ошибка", str(e))
 
     # def show_users(self):
     #     with next(get_db()) as db:
