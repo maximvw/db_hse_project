@@ -51,7 +51,7 @@ def get_users(db: Session):
 
 def get_table_data(db: Session, table_name: str):
     if table_name == "users":
-        return db.execute(text(f"SELECT * FROM {table_name} ORDER BY id ASC")).fetchall(),\
+        return db.execute(text(f"SELECT * FROM {table_name} ORDER BY id ASC")).fetchall(), \
                ["id", "name", "phone", "role"]
     if table_name == "services":
         return db.execute(text(f"SELECT * FROM {table_name} ORDER BY id ASC")).fetchall(), \
@@ -64,18 +64,22 @@ def get_table_data(db: Session, table_name: str):
         return db.execute(text(f"SELECT * FROM {table_name} ORDER BY id ASC")).fetchall(), \
                ["id", "client_id", "schedule_id", "total_cost"]
 
+
 def search_by_field(db: Session, value: str, table: str = 'services', field: str = 'service_name'):
-    return db.execute(text(f"SELECT (service_name, price_per_hour) FROM {table} WHERE {field} = :value"), {"value": value}).\
-        fetchall(), ["service_name", "price_per_hour"]
+    return db.execute(text(f"SELECT * FROM {table} WHERE {field} = :value"), {"value": value}). \
+               fetchall(), ["id", "service_name", "price_per_hour"]
+
 
 def update_row(db, table, row_id, updates):
     set_clause = ", ".join([f"{key} = :{key}" for key in updates.keys()])
     db.execute(text(f"UPDATE {table} SET {set_clause} WHERE id = :id"), {"id": row_id, **updates})
     db.commit()
 
+
 def delete_by_field(db, table, field, value):
     db.execute(text(f"DELETE FROM {table} WHERE {field} = :value"), {"value": value})
     db.commit()
+
 
 def clear_tables(db: Session):
     try:
