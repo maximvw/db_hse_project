@@ -59,8 +59,8 @@ def get_table_data(db: Session, table_name: str):
                ["id", "client_id", "schedule_id", "total_cost"]
 
 
-def search_by_field(db: Session, value: str, table: str = 'services', field: str = 'service_name'):
-    return db.execute(text(f"SELECT * FROM {table} WHERE {field} = :value"), {"value": value}). \
+def search_by_field(db: Session, value: str,):
+    return db.execute(text(f"SELECT * FROM services WHERE service_name = :value"), {"value": value}). \
                fetchall(), ["id", "service_name", "price_per_hour"]
 
 
@@ -74,9 +74,9 @@ def update_row(db, table, row_id, updates):
         raise e
 
 
-def delete_by_field(db, table, field, value):
+def delete_by_field(db, value):
     try:
-        db.execute(text(f"DELETE FROM {table} WHERE {field} = :value"), {"value": value})
+        db.execute(text(f"CALL delete_by_field(:value)"), {"value": value})
         db.commit()
     except Exception as e:
         db.rollback()

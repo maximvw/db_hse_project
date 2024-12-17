@@ -347,7 +347,7 @@ class MainWindow(QMainWindow):
             value = dialog.get_input()[0]
             with next(get_db()) as db:
                 try:
-                    delete_by_field(db, "services", "service_name", value)
+                    delete_by_field(db, value)
                     QMessageBox.information(self, "Успех", "Запись успешно удалена.")
                 except Exception as e:
                     QMessageBox.critical(self, "Ошибка", str(e))
